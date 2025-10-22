@@ -20,7 +20,7 @@ SPRING CORE — Inversion de Contrôle & Injection de Dépendances
 
 9. - @Configuration
 
-10. - @ComponentScan
+10. - @ComponentScan  
 
 11. - @Bean
 
