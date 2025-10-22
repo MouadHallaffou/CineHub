@@ -63,7 +63,7 @@ public class AppConfig implements WebMvcConfigurer {
         return properties;
     }
 
-    @Bean
+    @Bean(name = "transactionManager")
     public PlatformTransactionManager platformTransactionManager(EntityManagerFactory entityManagerFactory) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory);

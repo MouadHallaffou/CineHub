@@ -1,0 +1,19 @@
+services:
+  mysql:
+    image: mysql:9.4.0
+    container_name: cinehub_mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_DRIVER: ${MYSQL_DRIVER
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cinehub_network
+
+volumes:
+  mysql_data:
+networks:
+  cinehub_network:

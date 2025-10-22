@@ -8,7 +8,7 @@ public class App {
 
     @GetMapping("/")
     public String home() {
-        return "Bienvenue sur l'API CineHub!";
+        return "Bienvenue sur CineHub!";
     }
 
 }
