@@ -2,6 +2,7 @@ package com.cinehub.service;
 
 import com.cinehub.dto.CategoryDTO;
 import com.cinehub.mapper.CategoryMapper;
+import com.cinehub.mapper.CategoryMapper1;
 import com.cinehub.model.Category;
 import com.cinehub.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -36,9 +37,10 @@ public class CategoryService {
     }
 
     public CategoryDTO findById(Long id) {
-        Category category = categoryRepository.findByIdWithFilms(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
-        return categoryMapper.toDTO(category);
+//        category.getFilms().size(); // Force loading of films
+        return CategoryMapper1.toDTO(category);
     }
 
     public void deleteById(Long id) {

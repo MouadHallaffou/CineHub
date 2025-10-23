@@ -1,5 +1,7 @@
 package com.cinehub.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +25,7 @@ public class Director {
     private String lastName;
 
     @Column(name = "birth_date")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LocalDate birthDate;
 
     @Column(name = "nationality", length = 100)

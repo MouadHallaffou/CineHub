@@ -13,6 +13,8 @@ public class FilmDTO {
     private Integer durationMinutes;
     private String synopsis;
     private Double rating;
-    private Director director;
-//    private CategoryDTO category;
+    private String directorName;
+    private String categoryName;
+//    private Director director;
+//    private Category category;
 }

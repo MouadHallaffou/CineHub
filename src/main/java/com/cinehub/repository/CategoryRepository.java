@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.films WHERE c.categoryID = :id")
-    Optional<Category> findByIdWithFilms(@Param("id") Long id);
+//    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.films WHERE c.categoryID = :id")
+//    Optional<Category> findByIdWithFilms(@Param("id") Long id);
 }
 
