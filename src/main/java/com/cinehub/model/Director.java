@@ -1,7 +1,9 @@
 package com.cinehub.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -23,6 +25,7 @@ public class Director {
     private String lastName;
 
     @Column(name = "birth_date")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LocalDate birthDate;
 
     @Column(name = "nationality", length = 100)
@@ -33,4 +36,5 @@ public class Director {
 
     @OneToMany(mappedBy = "director", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Film> films;
+
 }

@@ -1,31 +1,62 @@
 package com.cinehub.service;
 
+import com.cinehub.dto.CategoryDTO;
+import com.cinehub.mapper.CategoryMapper;
+import com.cinehub.mapper.CategoryMapper1;
 import com.cinehub.model.Category;
 import com.cinehub.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class CategoryService {
+
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
         this.categoryRepository = categoryRepository;
+        this.categoryMapper = categoryMapper;
     }
 
-    public Category saveCategory(Category category) {
-        return categoryRepository.save(category);
+    public CategoryDTO saveCategory(CategoryDTO dto) {
+        Category category = categoryMapper.toEntity(dto);
+        Category saved = categoryRepository.save(category);
+        return categoryMapper.toDTO(saved);
     }
 
-    public Category findCategoryById(Long id) {
-        return categoryRepository.findById(id).orElse(null);
+    public List<CategoryDTO> findAllCategories() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(categoryMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<Category> findAllCategories() {
-        return categoryRepository.findAll();
+    public CategoryDTO findById(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+//        category.getFilms().size(); // Force loading of films
+        return CategoryMapper1.toDTO(category);
+    }
+
+    public void deleteById(Long id) {
+        categoryRepository.deleteById(id);
+    }
+
+    public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
+        Category existingCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+
+        existingCategory.setName(dto.getName());
+        existingCategory.setDescription(dto.getDescription());
+
+        Category updated = categoryRepository.save(existingCategory);
+        return categoryMapper.toDTO(updated);
     }
 
 }
+

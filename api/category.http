@@ -2,8 +2,21 @@ POST http://localhost:8080/api/categories
 content-type: application/json
 
 {
-  "name": "New Category",
-  "description": "Description of the new category"
+  "name": "Category 2",
+  "description": "Description of the category 2"
 }
 ###
 GET http://localhost:8080/api/categories
+
+###
+
+GET http://localhost:8080/api/categories/1
+
+###
+PUT http://localhost:8080/api/categories/2
+content-type: application/json
+
+{
+    "name": "Updated Category 2",
+    "description": "Updated description of the category 2"
+}
