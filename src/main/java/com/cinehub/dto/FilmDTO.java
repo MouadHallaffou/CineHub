@@ -1,7 +1,5 @@
 package com.cinehub.dto;
 
-import com.cinehub.model.Category;
-import com.cinehub.model.Director;
 import lombok.*;
 
 @Data
@@ -13,8 +11,8 @@ public class FilmDTO {
     private Integer durationMinutes;
     private String synopsis;
     private Double rating;
-    private String directorName;
+    private String directorFirstName;
+    private String directorLastName;
+    private String birthDate;
     private String categoryName;
-//    private Director director;
-//    private Category category;
 }

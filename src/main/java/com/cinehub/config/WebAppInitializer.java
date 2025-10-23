@@ -1,7 +1,5 @@
 package com.cinehub.config;
 
-import jakarta.servlet.Filter;
-import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -21,14 +19,6 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
     protected Class<?>[] getServletConfigClasses() {
         return null;
     }
-
-    @Override
-    protected Filter[] getServletFilters() {
-        OpenEntityManagerInViewFilter openEntityManagerInViewFilter = new OpenEntityManagerInViewFilter();
-        openEntityManagerInViewFilter.setEntityManagerFactoryBeanName("entityManagerFactory");
-        return new Filter[]{openEntityManagerInViewFilter};
-    }
-
 
     /*
     * Map the DispatcherServlet to "/"
