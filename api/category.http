@@ -2,8 +2,8 @@ POST http://localhost:8080/api/categories
 content-type: application/json
 
 {
-  "name": "New Category",
-  "description": "Description of the new category"
+  "name": "Category 2",
+  "description": "Description of the category 2"
 }
 ###
 GET http://localhost:8080/api/categories

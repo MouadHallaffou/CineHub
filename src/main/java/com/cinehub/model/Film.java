@@ -1,7 +1,7 @@
 package com.cinehub.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Data
 @Entity

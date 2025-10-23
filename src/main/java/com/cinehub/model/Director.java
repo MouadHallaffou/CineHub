@@ -1,7 +1,7 @@
 package com.cinehub.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -33,4 +33,5 @@ public class Director {
 
     @OneToMany(mappedBy = "director", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Film> films;
+
 }
