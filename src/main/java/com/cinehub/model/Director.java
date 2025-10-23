@@ -2,6 +2,7 @@ package com.cinehub.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.time.LocalDate;
 import java.util.Set;

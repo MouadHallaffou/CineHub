@@ -4,9 +4,11 @@ import com.cinehub.model.Category;
 import com.cinehub.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.logging.Filter;
 
 @RestController
 @RequestMapping("/api/categories")
