@@ -36,7 +36,7 @@ public class CategoryService {
     }
 
     public CategoryDTO findById(Long id) {
-        Category category = categoryRepository.findById(id)
+        Category category = categoryRepository.findByIdWithFilms(id)
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
         return categoryMapper.toDTO(category);
     }

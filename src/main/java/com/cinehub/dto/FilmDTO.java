@@ -14,5 +14,5 @@ public class FilmDTO {
     private String synopsis;
     private Double rating;
     private Director director;
-    private Category category;
+//    private CategoryDTO category;
 }
