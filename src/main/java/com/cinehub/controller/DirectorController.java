@@ -61,9 +61,9 @@ public class DirectorController {
 
     // display all films of a director
     @GetMapping("/{id}/films")
-    public ResponseEntity<List<Long>> getDirectorWithFilms(@PathVariable("id") Long id) {
-        List<Long> filmIds = directorService.findFilmIdsByDirectorId(id);
-        return ResponseEntity.ok(filmIds);
+    public ResponseEntity<java.util.Map<Long, String>> getDirectorWithFilms(@PathVariable("id") Long id) {
+        java.util.Map<Long, String> films = directorService.findFilmIdsByDirectorId(id);
+        return ResponseEntity.ok(films);
     }
 
 }
