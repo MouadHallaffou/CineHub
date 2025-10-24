@@ -13,6 +13,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    // Constructor Injection
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
@@ -53,10 +54,9 @@ public class CategoryController {
 
     // consulter tous les films d'une catégorie donnée
     @GetMapping("/{id}/films")
-    public ResponseEntity<CategoryDTO> getFilmsByCategoryId(@PathVariable("id") Long id) {
-        CategoryDTO categoryDTO = categoryService.findById(id);
-        return ResponseEntity.ok(categoryDTO);
+    public ResponseEntity<List<Long>> getFilmsByCategoryId(@PathVariable("id") Long id) {
+        List<Long> filmIds = categoryService.findFilmIdsByCategoryId(id);
+        return ResponseEntity.ok(filmIds);
     }
+
 }
-
-

@@ -1,7 +1,7 @@
 package com.cinehub.mapper;
 
 import com.cinehub.dto.CategoryDTO;
-import com.cinehub.dto.FilmDTO;
+import com.cinehub.dto.FilmResponseDTO;
 import com.cinehub.model.Category;
 import com.cinehub.model.Film;
 import org.mapstruct.Mapper;
@@ -20,5 +20,5 @@ public interface CategoryMapper {
     @Mapping(target = "directorLastName", source = "director.lastName")
     @Mapping(target = "birthDate", source = "director.birthDate")
     @Mapping(target = "categoryName", source = "category.name")
-    FilmDTO filmToDTO(Film film);
+    FilmResponseDTO filmToDTO(Film film);
 }
