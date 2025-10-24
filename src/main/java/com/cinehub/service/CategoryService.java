@@ -1,11 +1,12 @@
 package com.cinehub.service;
 
 import com.cinehub.dto.CategoryDTO;
+import com.cinehub.exception.CategoryException;
 import com.cinehub.mapper.CategoryMapper;
 import com.cinehub.model.Category;
 import com.cinehub.repository.CategoryRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,17 +38,23 @@ public class CategoryService {
 
     public CategoryDTO findById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new CategoryException(id));
         return categoryMapper.toDTO(category);
     }
 
     public void deleteById(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new CategoryException(id);
+        }
+        if (!findById(id).getFilms().isEmpty()) {
+            throw new RuntimeException("Cannot delete category with associated films.");
+        }
         categoryRepository.deleteById(id);
     }
 
     public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
         Category existingCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new CategoryException(id));
 
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());

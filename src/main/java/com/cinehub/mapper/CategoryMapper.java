@@ -15,7 +15,7 @@ public interface CategoryMapper {
 
     Category toEntity(CategoryDTO dto);
 
-    // Mapper pour Film to FilmDTO
+
     @Mapping(target = "directorFirstName", source = "director.firstName")
     @Mapping(target = "directorLastName", source = "director.lastName")
     @Mapping(target = "birthDate", source = "director.birthDate")
