@@ -1,0 +1,1196 @@
+================================================================================
+                        DOCUMENTATION TECHNIQUE
+           SPRING CORE / SPRING DATA / SPRING MVC (sans Spring Boot)
+================================================================================
+
+================================================================================
+    PARTIE 1 : SPRING CORE — Inversion de Contrôle & Injection de Dépendances
+================================================================================
+
+--------------------------------------------------------------------------------
+1. Qu'est-ce que Spring Core et à quoi sert-il dans une application Java ?
+--------------------------------------------------------------------------------
+
+Spring Core est le module fondamental du Spring Framework. Il est le cœur sur
+lequel reposent tous les autres modules de Spring. Son rôle principal est de
+fournir un conteneur d'Inversion de Contrôle (IoC).
+
+Rôle :
+Il permet de créer, configurer et gérer le cycle de vie des objets (appelés
+beans) de l'application, ainsi que de gérer leurs dépendances. Cela favorise
+un couplage faible et une meilleure testabilité du code.
+
+Exemple :
+Au lieu d'écrire MonService service = new MonServiceImpl(); partout dans votre
+code, vous laissez Spring créer l'instance de MonServiceImpl et la fournit où
+elle est nécessaire.
+
+--------------------------------------------------------------------------------
+2. Que signifie le principe d'Inversion de Contrôle (IoC) ?
+--------------------------------------------------------------------------------
+
+L'Inversion de Contrôle (IoC) est un principe de conception logicielle où le
+flux de contrôle d'un programme est inversé :
+
+Sans IoC (Contrôle classique) :
+Le développeur est responsable de l'instanciation des objets dépendants
+(new MonObjet()) et de l'appel de leurs méthodes. L'objet contrôle ses propres
+dépendances.
+
+Avec IoC :
+Un framework (comme Spring) prend en charge l'instanciation et la gestion des
+objets et de leurs dépendances. L'objet délègue la responsabilité de
+l'obtention de ses dépendances au conteneur.
+
+Exemple :
+Une classe MonService a besoin d'un MonDAO.
+- Avant IoC : MonService crée (contrôle) son MonDAO.
+- Avec IoC : Le conteneur Spring crée les deux et "injecte" le MonDAO dans
+  MonService. MonService n'a pas à savoir comment MonDAO est créé.
+
+--------------------------------------------------------------------------------
+3. Quelle est la différence entre IoC et Injection de Dépendances (DI) ?
+--------------------------------------------------------------------------------
+
+IoC (Inversion of Control) :
+C'est le principe ou le concept abstrait selon lequel on inverse la
+responsabilité de la gestion des dépendances.
+
+DI (Dependency Injection) :
+C'est la mise en œuvre concrète du principe d'IoC. C'est la façon dont le
+conteneur fournit les dépendances (les objets nécessaires) à un autre objet.
+
+Analogie :
+L'IoC est l'idée de laisser quelqu'un d'autre vous donner les outils pour
+travailler. La DI est l'acte spécifique de cette personne vous tendant les
+outils (via le constructeur, une méthode setter ou un champ).
+
+--------------------------------------------------------------------------------
+4. Qu'est-ce qu'un bean dans Spring ?
+--------------------------------------------------------------------------------
+
+Un bean dans Spring est un objet qui est instancié, assemblé et géré par le
+conteneur IoC de Spring.
+
+Ce sont les objets qui constituent l'épine dorsale de votre application et qui
+sont configurés à l'aide de métadonnées de configuration (XML, annotations ou
+Java Config).
+
+Exemple :
+Votre classe UserService ou ProductRepository devient un bean lorsque Spring
+en prend la gestion.
+
+--------------------------------------------------------------------------------
+5. Quel est le rôle du conteneur IoC ?
+--------------------------------------------------------------------------------
+
+Le Conteneur IoC (Spring Container) est le cœur de Spring. Son rôle est de :
+
+- Instancier les beans (créer les objets à partir des classes).
+- Configurer les beans (définir leurs propriétés/valeurs initiales).
+- Assembler les dépendances (injecter les beans requis dans d'autres beans,
+  c'est la DI).
+- Gérer le cycle de vie des beans (du démarrage à la destruction).
+- Fournir les beans à l'application.
+
+Exemple :
+Le conteneur lit la configuration (par ex. un @Configuration Java) et sait
+qu'il doit créer une instance de DataSource, une de JpaTransactionManager, et
+injecter la DataSource dans le JpaTransactionManager.
+
+--------------------------------------------------------------------------------
+6. Quelle est la différence entre ApplicationContext et BeanFactory ?
+--------------------------------------------------------------------------------
+
+Ce sont les deux types de conteneurs IoC fournis par Spring, ApplicationContext
+étant une amélioration de BeanFactory.
+
+╔════════════════╦════════════════════════════╦══════════════════════════════╗
+║ Caractéristique║ BeanFactory (Base)        ║ ApplicationContext (Avancé) ║
+╠════════════════╬════════════════════════════╬══════════════════════════════╣
+║ Chargement     ║ Lazy Loading : Les beans  ║ Eager Loading : Les beans    ║
+║                ║ sont chargés uniquement   ║ Singleton sont chargés au    ║
+║                ║ lorsqu'ils sont demandés  ║ démarrage du contexte        ║
+╠════════════════╬════════════════════════════╬══════════════════════════════╣
+║ Fonctionnalités║ Minimales : Support       ║ Avancées : Hérite de         ║
+║                ║ IoC/DI de base uniquement ║ BeanFactory et ajoute :      ║
+║                ║                            ║ - i18n                       ║
+║                ║                            ║ - Événements d'application   ║
+║                ║                            ║ - Intégration AOP            ║
+║                ║                            ║ - Détection automatique      ║
+╠════════════════╬════════════════════════════╬══════════════════════════════╣
+║ Utilisation    ║ Environnements avec       ║ Recommandé pour la majorité  ║
+║                ║ contraintes mémoire       ║ des applications entreprise  ║
+╚════════════════╩════════════════════════════╩══════════════════════════════╝
+
+Exemple :
+Avant Spring Boot, on démarrait souvent une application web en instanciant un
+XmlWebApplicationContext ou un AnnotationConfigWebApplicationContext.
+
+--------------------------------------------------------------------------------
+7. Quelles sont les trois approches de configuration dans Spring ?
+--------------------------------------------------------------------------------
+
+Spring permet de définir les métadonnées (qui sont les beans et comment ils
+sont connectés) de trois façons principales :
+
+1) Configuration XML :
+   Principe : Définition des beans et de leurs dépendances dans un fichier XML.
+
+   Exemple :
+   <bean id="userService" class="com.example.UserServiceImpl">
+       <property name="userRepository" ref="userRepository"/>
+   </bean>
+
+2) Annotations (basées sur la détection automatique de composants) :
+   Principe : Utilisation d'annotations (@Component, @Autowired) directement
+   dans le code source pour marquer les classes comme beans et pour spécifier
+   les injections.
+
+   Exemple :
+   Placer @Service sur UserServiceImpl et @Autowired sur l'attribut
+   userRepository.
+
+3) Java Config (Configuration basée sur Java) :
+   Principe : Définition des beans dans une classe Java annotée avec
+   @Configuration en utilisant la méthode @Bean.
+
+   Exemple :
+   @Configuration
+   public class AppConfig {
+       @Bean
+       public UserService userService() {
+           return new UserServiceImpl(userRepository());
+       }
+   }
+
+--------------------------------------------------------------------------------
+8. À quoi servent les annotations suivantes ?
+--------------------------------------------------------------------------------
+
+@Configuration
+--------------
+Rôle : Indique qu'une classe contient des définitions de beans via des méthodes
+annotées avec @Bean. C'est la base de la configuration basée sur Java.
+
+Exemple :
+Une classe DatabaseConfig annotée avec @Configuration contiendra des méthodes
+@Bean pour créer le DataSource et l'EntityManagerFactory.
+
+@ComponentScan
+--------------
+Rôle : Indique au conteneur Spring de scanner un ensemble de packages à la
+recherche de classes annotées avec des stéréotypes Spring (@Component, @Service,
+@Repository, @Controller). C'est l'activation de la détection automatique.
+
+Exemple :
+@ComponentScan(basePackages = "com.monprojet.service") indique à Spring de
+chercher les beans dans le package com.monprojet.service.
+
+@Bean
+-----
+Rôle : Utilisée dans une classe @Configuration, elle marque une méthode dont
+l'objet retourné doit être enregistré comme un bean dans le conteneur IoC.
+
+Exemple :
+@Bean
+public DataSource dataSource() {
+    return new BasicDataSource();
+}
+
+@Component, @Service, @Repository, @Controller
+-----------------------------------------------
+Ce sont des annotations de stéréotype qui sont essentiellement des cas
+spécifiques de @Component. Elles marquent une classe comme étant un bean géré
+par Spring, mais elles indiquent aussi le rôle de la classe dans l'architecture.
+
+╔═══════════════╦═══════════════════════════════╦══════════════════════════╗
+║ Annotation    ║ Rôle                          ║ Couche d'Architecture   ║
+╠═══════════════╬═══════════════════════════════╬══════════════════════════╣
+║ @Component    ║ Stéréotype générique pour     ║ N'importe quelle couche ║
+║               ║ tout composant Spring         ║ (moins spécifique)      ║
+╠═══════════════╬═══════════════════════════════╬══════════════════════════╣
+║ @Service      ║ Contient la logique métier    ║ Couche Service          ║
+║               ║ (Business Logic)              ║                         ║
+╠═══════════════╬═══════════════════════════════╬══════════════════════════╣
+║ @Repository   ║ Accès à la persistance de     ║ Couche DAO/Persistance  ║
+║               ║ données (BDD). Utilisé avec   ║                         ║
+║               ║ Spring Data JPA               ║                         ║
+╠═══════════════╬═══════════════════════════════╬══════════════════════════╣
+║ @Controller   ║ Gère les requêtes web et      ║ Couche Web/Présentation ║
+║               ║ retourne une vue ou un modèle ║ (Spring MVC)            ║
+╚═══════════════╩═══════════════════════════════╩══════════════════════════╝
+
+@Autowired, @Qualifier
+----------------------
+@Autowired :
+Rôle : Marque un constructeur, un champ (attribut) ou une méthode setter comme
+nécessitant une injection de dépendance. Spring recherche un bean de type
+correspondant dans le conteneur et l'injecte.
+
+Exemple (Injection par champ) :
+@Autowired
+private UserService userService;
+
+@Qualifier :
+Rôle : Utilisée en combinaison avec @Autowired lorsque plusieurs beans du même
+type existent dans le conteneur. Elle permet de spécifier par le nom exact quel
+bean doit être injecté.
+
+Exemple :
+Si vous avez EmailSenderImplA et EmailSenderImplB, vous pouvez faire :
+@Autowired
+@Qualifier("emailSenderImplA")
+private EmailSender emailSender;
+
+--------------------------------------------------------------------------------
+14. Comment Spring détecte et crée automatiquement les composants ?
+--------------------------------------------------------------------------------
+
+Le mécanisme clé est la Détection de Composants (Component Scanning) :
+
+1. Configuration :
+   L'application doit démarrer un ApplicationContext et lui fournir une classe
+   @Configuration qui contient l'annotation @ComponentScan avec la liste des
+   packages à scanner.
+
+2. Analyse :
+   Le conteneur IoC de Spring parcourt les packages spécifiés et recherche les
+   classes annotées avec des stéréotypes (par ex. @Component, @Service,
+   @Repository, @Controller).
+
+3. Enregistrement :
+   Pour chaque classe trouvée, Spring en crée une définition de bean et
+   l'enregistre dans le conteneur (sauf indication contraire, avec un scope
+   singleton).
+
+4. Injection :
+   Lorsque les beans sont créés, Spring résout les dépendances annotées avec
+   @Autowired en injectant d'autres beans enregistrés.
+
+Exemple :
+Le conteneur voit @ComponentScan(basePackages = "com.app"). Il trouve
+com.app.MyService annoté @Service et l'enregistre comme le bean myService.
+
+--------------------------------------------------------------------------------
+15. Quelles sont les étapes du cycle de vie d'un bean ?
+--------------------------------------------------------------------------------
+
+Le cycle de vie d'un bean géré par le conteneur Spring (pour un bean Singleton)
+suit généralement ces étapes :
+
+1. Instantiation :
+   Le conteneur crée l'instance du bean (appel du constructeur).
+
+2. Population des propriétés :
+   Les dépendances (champs @Autowired ou propriétés définies) sont injectées.
+
+3. Traitement BeanNameAware :
+   Si la classe implémente BeanNameAware, le nom du bean est injecté.
+
+4. Traitement BeanFactoryAware / ApplicationContextAware :
+   Le conteneur lui-même peut être injecté.
+
+5. BeanPostProcessor (postProcessBeforeInitialization) :
+   Les post-processeurs peuvent modifier le bean avant l'initialisation.
+
+6. Initialisation :
+   Si la méthode est définie par @PostConstruct (ou par l'attribut init-method
+   dans XML), elle est appelée. C'est l'endroit pour effectuer des
+   initialisations nécessaires (connexion, chargement de données initiales).
+
+7. BeanPostProcessor (postProcessAfterInitialization) :
+   Les post-processeurs peuvent envelopper le bean (par ex. créer un proxy AOP
+   pour les transactions).
+
+8. Prêt à l'emploi :
+   Le bean est stocké dans le conteneur et peut être utilisé par l'application.
+
+9. Destruction :
+   Lorsque le conteneur s'arrête, la méthode de destruction est appelée
+   (@PreDestroy ou attribut destroy-method dans XML).
+
+--------------------------------------------------------------------------------
+16. Quelle est la différence entre les scopes de bean ?
+--------------------------------------------------------------------------------
+
+Le scope (portée) d'un bean définit la manière dont le conteneur gère l'objet
+(combien d'instances sont créées et quand).
+
+╔═══════════╦═══════════════════════════════════╦═══════════════════════════╗
+║ Scope     ║ Description                       ║ Quand est-il créé ?      ║
+╠═══════════╬═══════════════════════════════════╬═══════════════════════════╣
+║ Singleton ║ Une seule instance par conteneur  ║ Au démarrage du conteneur║
+║           ║ IoC. C'est le scope par défaut    ║ (ou lors du premier accès║
+║           ║                                    ║ si "lazy-init" activé)   ║
+╠═══════════╬═══════════════════════════════════╬═══════════════════════════╣
+║ Prototype ║ Une nouvelle instance est créée   ║ À chaque fois qu'il est  ║
+║           ║ à chaque demande du bean          ║ demandé                  ║
+╠═══════════╬═══════════════════════════════════╬═══════════════════════════╣
+║ Request   ║ Une instance par requête HTTP     ║ Lors de l'arrivée d'une  ║
+║           ║ (uniquement pour les apps web)    ║ requête HTTP             ║
+╠═══════════╬═══════════════════════════════════╬═══════════════════════════╣
+║ Session   ║ Une instance par session HTTP     ║ Lors de la création d'une║
+║           ║ (uniquement pour les apps web)    ║ session HTTP             ║
+╚═══════════╩═══════════════════════════════════╩═══════════════════════════╝
+
+Exemple :
+Un UserService est généralement un Singleton (la même instance gère toutes les
+requêtes). Un objet de gestion de l'état temporaire dans un formulaire web
+pourrait être un Prototype pour garantir que chaque utilisateur travaille avec
+une nouvelle instance.
+
+--------------------------------------------------------------------------------
+17. Pourquoi la configuration manuelle (avant Spring Boot) est-elle
+    importante à comprendre ?
+--------------------------------------------------------------------------------
+
+Avant l'avènement de Spring Boot, toute la configuration était manuelle (XML ou
+Java Config). Comprendre ce processus est crucial car :
+
+1. Compréhension Fondamentale :
+   Cela révèle comment Spring fonctionne réellement (le "magic" de Spring Boot
+   est une abstraction de cette configuration manuelle).
+
+2. Dépannage Avancé :
+   Si une application Spring Boot a un problème de configuration (par ex. un
+   bean non trouvé), la compréhension du cycle de vie manuel aide à localiser
+   le bean manquant, le scope incorrect ou la dépendance non résolue.
+
+3. Projets Hérités :
+   Beaucoup d'applications d'entreprise sont encore basées sur une configuration
+   Spring MVC/Core sans Spring Boot, nécessitant ces connaissances.
+
+4. Personnalisation :
+   Pour des configurations très spécifiques qui ne sont pas couvertes par les
+   conventions de Spring Boot (par ex. configurations multi-DataSource), la
+   configuration manuelle (Java Config) est la seule option.
+
+
+================================================================================
+              PARTIE 2 : SPRING DATA JPA — Persistance & Transactions
+================================================================================
+
+--------------------------------------------------------------------------------
+18. Qu'est-ce que Spring Data JPA et quel problème résout-il ?
+--------------------------------------------------------------------------------
+
+Spring Data JPA est un module qui simplifie énormément l'implémentation de la
+couche d'accès aux données (DAO/Repository) pour les applications utilisant
+JPA (Java Persistence API).
+
+Problème résolu :
+Le "boilerplate code" (code répétitif et standard) des couches DAO.
+
+Sans Spring Data JPA :
+Il faut coder manuellement les méthodes pour chaque opération CRUD basique
+(par ex. findById(), save(), findAll()) pour chaque entité, souvent avec une
+dépendance à l'EntityManager.
+
+Avec Spring Data JPA :
+Il génère automatiquement l'implémentation de ces méthodes, ainsi que des
+requêtes personnalisées basées sur le nom des méthodes de l'interface du
+Repository.
+
+Exemple :
+Pour l'entité User, au lieu de coder public User findUserByEmail(String email)
+{...}, il suffit de déclarer l'interface :
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    User findByEmail(String email);
+}
+
+Spring génère le code d'implémentation à l'exécution.
+
+--------------------------------------------------------------------------------
+19. Quelle est la différence entre JPA et Hibernate ?
+--------------------------------------------------------------------------------
+
+JPA (Java Persistence API) :
+C'est une spécification (une API standard Java) qui définit l'ensemble des
+règles, interfaces et annotations pour le mapping objet-relationnel (ORM) et
+la gestion de la persistance en Java. JPA ne fait rien elle-même ; elle définit
+comment les choses doivent être faites.
+
+Hibernate :
+C'est la mise en œuvre (implémentation) la plus populaire et la plus utilisée
+de la spécification JPA. Hibernate fournit le moteur concret qui exécute les
+requêtes SQL, gère la mise en cache et réalise le mapping entre les objets Java
+et les tables de la base de données.
+
+Analogie :
+JPA est le plan de la maison. Hibernate (ou EclipseLink, OpenJPA) est
+l'entreprise de construction qui exécute le plan. Spring Data JPA utilise
+Hibernate (par défaut) pour l'exécution réelle.
+
+--------------------------------------------------------------------------------
+20. Qu'est-ce qu'une entité JPA ?
+--------------------------------------------------------------------------------
+
+Une entité JPA (JPA Entity) est une classe Java POJO (Plain Old Java Object)
+qui représente une ligne dans une table de base de données.
+
+Caractéristiques :
+- Elle doit être annotée avec @Entity.
+- Elle doit avoir une clé primaire, généralement annotée avec @Id.
+- Elle contient des champs (attributs) qui correspondent aux colonnes de la
+  table.
+- Elle peut définir les relations avec d'autres entités (@OneToMany,
+  @ManyToOne, etc.).
+
+Exemple :
+@Entity
+@Table(name = "T_PRODUCT")
+public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String name;
+    // ...
+}
+
+--------------------------------------------------------------------------------
+21. À quoi sert le DataSource ?
+--------------------------------------------------------------------------------
+
+Le DataSource est une interface Java (faisant partie de l'API JDBC) qui est une
+fabrique de connexions physiques à la base de données.
+
+Rôle :
+Il fournit l'objet de connexion (java.sql.Connection) au moment où l'application
+en a besoin pour exécuter une requête.
+
+Pool de Connexions :
+Dans les applications d'entreprise (comme Spring), le DataSource est presque
+toujours implémenté par un pool de connexions (par ex. HikariCP, DBCP) qui gère
+un ensemble de connexions prêtes à l'emploi pour améliorer les performances.
+
+Exemple :
+Le DataSource contient les informations de connexion : URL de la base, nom
+d'utilisateur et mot de passe.
+
+--------------------------------------------------------------------------------
+22. Que fait l'EntityManager ?
+--------------------------------------------------------------------------------
+
+L'EntityManager est l'interface centrale de l'API JPA. Il est responsable de
+la gestion du contexte de persistance.
+
+Rôle :
+- Gérer le cycle de vie des entités (créer, lire, mettre à jour, supprimer —
+  CRUD).
+- Synchroniser les changements des entités avec la base de données.
+- Exécuter les requêtes JPQL (Java Persistence Query Language).
+
+Contexte de Persistance :
+C'est un cache de niveau 1 qui garde en mémoire les objets entités qui sont en
+cours d'utilisation dans la transaction courante.
+
+Exemple :
+Une classe DAO traditionnelle pourrait utiliser l'EntityManager pour
+l'opération em.persist(new Product()) ou em.find(Product.class, 1L).
+Spring Data JPA le cache sous le capot.
+
+--------------------------------------------------------------------------------
+23. Quelle est la responsabilité du TransactionManager ?
+--------------------------------------------------------------------------------
+
+Le TransactionManager (Gestionnaire de Transactions) de Spring est responsable
+de l'abstraction et de la gestion du cycle de vie des transactions.
+
+Responsabilités :
+- Démarrer une transaction (begin).
+- Valider (commit) la transaction (si toutes les opérations ont réussi).
+- Annuler (rollback) la transaction (en cas d'erreur ou d'exception).
+- Gérer la propagation et l'isolation des transactions.
+
+Abstraction :
+Spring Transaction isole le développeur des APIs de transactions spécifiques
+(JDBC, JTA, JPA/Hibernate). Pour JPA, on utilise souvent un
+JpaTransactionManager.
+
+Exemple :
+Lorsque Spring voit @Transactional sur une méthode, le TransactionManager est
+appelé pour démarrer la transaction avant l'exécution de la méthode et
+valider/annuler après.
+
+--------------------------------------------------------------------------------
+24. À quoi sert l'annotation @EnableJpaRepositories ?
+--------------------------------------------------------------------------------
+
+L'annotation @EnableJpaRepositories est utilisée dans une classe de
+configuration Java (@Configuration) pour activer la prise en charge de Spring
+Data JPA.
+
+Rôle : Elle indique à Spring de :
+- Rechercher (scanner) les interfaces de Repository qui étendent Repository ou
+  JpaRepository dans les packages spécifiés.
+- Générer dynamiquement une implémentation concrète pour ces interfaces à
+  l'exécution.
+- Enregistrer ces implémentations en tant que beans dans le conteneur IoC.
+
+Exemple (Configuration Java) :
+@Configuration
+@EnableJpaRepositories(basePackages = "com.app.repository")
+public class JpaConfig { /* ... */ }
+
+--------------------------------------------------------------------------------
+25. Qu'est-ce qu'un repository Spring Data ?
+--------------------------------------------------------------------------------
+
+Un Repository Spring Data est une interface Java qui définit les opérations
+d'accès aux données (CRUD) pour une entité spécifique.
+
+Caractéristique :
+Il doit étendre une des interfaces du framework (par ex. Repository,
+CrudRepository, ou JpaRepository).
+
+Avantage :
+Le développeur n'a qu'à déclarer l'interface et ses méthodes; Spring Data se
+charge de fournir l'implémentation concrète à l'exécution.
+
+Exemple :
+public interface UserRepository extends JpaRepository<User, Long> {
+    User findByUsername(String username); // Méthode générée par Spring Data
+}
+
+--------------------------------------------------------------------------------
+26. Quelles sont les méthodes génériques fournies par JpaRepository ?
+--------------------------------------------------------------------------------
+
+L'interface JpaRepository<T, ID> étend PagingAndSortingRepository et
+CrudRepository, offrant un ensemble riche de méthodes génériques pour les
+opérations de persistance courantes.
+
+╔════════════════╦═══════════════════════════╦═════════════════════════════╗
+║ Catégorie      ║ Méthodes Clés (Exemples)  ║ Description                ║
+╠════════════════╬═══════════════════════════╬═════════════════════════════╣
+║ CRUD           ║ save(T entity)            ║ Enregistre une entité      ║
+║                ║                            ║ (insert ou update)         ║
+║                ║ findById(ID id)           ║ Récupère une entité par ID ║
+║                ║                            ║ (retourne Optional<T>)     ║
+║                ║ findAll()                 ║ Récupère toutes les entités║
+║                ║ delete(T entity)          ║ Supprime l'entité donnée   ║
+╠════════════════╬═══════════════════════════╬═════════════════════════════╣
+║ Recherche      ║ getOne(ID id) (deprecated)║ Retourne une référence à   ║
+║                ║                            ║ l'entité                   ║
+║                ║ existsById(ID id)         ║ Vérifie si une entité      ║
+║                ║                            ║ existe par son ID          ║
+╠════════════════╬═══════════════════════════╬═════════════════════════════╣
+║ Tri &          ║ findAll(Sort sort)        ║ Récupère toutes les entités║
+║ Pagination     ║                            ║ triées                     ║
+║                ║ findAll(Pageable pageable)║ Récupère une page d'entités║
+╠════════════════╬═══════════════════════════╬═════════════════════════════╣
+║ Flush          ║ flush()                   ║ Synchronise le contexte de ║
+║                ║                            ║ persistance avec la BDD    ║
+╚════════════════╩═══════════════════════════╩═════════════════════════════╝
+
+Exemple :
+Un service peut appeler directement userRepository.findAll(PageRequest.of(0, 10))
+pour obtenir les 10 premiers utilisateurs.
+
+--------------------------------------------------------------------------------
+27. Comment gérer les transactions avec Spring ?
+--------------------------------------------------------------------------------
+
+Spring gère les transactions de manière déclarative principalement grâce à
+l'annotation @Transactional.
+
+Activation :
+L'annotation @EnableTransactionManagement doit être présente dans une classe de
+configuration.
+
+Déclaration :
+Placer @Transactional sur une classe de service ou sur une méthode individuelle.
+
+Exemple :
+@Service
+public class OrderService {
+    @Transactional // Applique la transaction à la méthode
+    public void processOrder(Order o) {
+        // ... deux appels DAO ...
+    }
+}
+
+Propagation :
+Définit comment la transaction se comporte si une transaction est déjà en cours.
+- Valeur par défaut (Propagation.REQUIRED) : Utilise la transaction existante
+  s'il y en a une, sinon en crée une nouvelle.
+- Exemple : @Transactional(propagation = Propagation.REQUIRES_NEW) force la
+  création d'une nouvelle transaction, suspendant l'ancienne si elle existe.
+
+Rollback :
+Définit les conditions dans lesquelles la transaction doit être annulée.
+- Par défaut : Le rollback se produit pour les exceptions non vérifiées
+  (RuntimeException et ses sous-classes).
+- Exemple : @Transactional(rollbackFor = MyCheckedException.class) force le
+  rollback pour une exception vérifiée spécifique.
+
+Lecture Seule :
+@Transactional(readOnly = true) est une optimisation qui indique que la méthode
+ne fait que lire les données, permettant au gestionnaire de transactions de
+sauter certaines étapes.
+
+--------------------------------------------------------------------------------
+28. Pourquoi définir manuellement la connexion à la base de données avant
+    Spring Boot ?
+--------------------------------------------------------------------------------
+
+Avant Spring Boot, l'approche par Convention sur Configuration n'était pas la
+norme. Le développeur devait explicitement déclarer et configurer les éléments
+nécessaires à la persistance pour que le conteneur Spring puisse les gérer :
+
+1. Définition du DataSource :
+   Déclarer le bean DataSource avec l'URL de la base de données, le driver,
+   l'utilisateur et le mot de passe (via XML ou Java Config).
+
+2. Configuration du EntityManagerFactory :
+   Définir le bean LocalContainerEntityManagerFactoryBean et lui donner le
+   DataSource ainsi que les propriétés JPA/Hibernate (dialecte, stratégie de
+   création des tables, package des entités).
+
+3. Configuration du TransactionManager :
+   Définir le bean JpaTransactionManager et lui injecter l'EntityManagerFactory.
+
+Leçon :
+Chaque brique de la couche de persistance devait être explicitement assemblée
+par le développeur. Spring Boot automatise ces étapes en faisant des
+suppositions intelligentes (par ex. utiliser HikariCP, deviner le dialecte à
+partir de l'URL).
+
+--------------------------------------------------------------------------------
+29. Que doit contenir une configuration de persistance complète ?
+--------------------------------------------------------------------------------
+
+Une configuration de persistance complète en Java Config (avant Spring Boot)
+nécessite au moins trois beans principaux :
+
+1. DataSource (JDBC) :
+   - Objectif : Fournir les connexions à la base de données.
+   - Configuration : URL, driver, utilisateur, mot de passe.
+   - Classe typique : org.apache.commons.dbcp2.BasicDataSource ou
+                     com.zaxxer.hikari.HikariDataSource.
+
+2. EntityManagerFactory (JPA) :
+   - Objectif : Créer des EntityManager et gérer les métadonnées de persistance.
+   - Configuration :
+     * Injection du DataSource.
+     * Propriétés JPA/Hibernate (par ex. hibernate.hbm2ddl.auto=update,
+       hibernate.dialect).
+     * Package(s) où trouver les entités (setPackagesToScan).
+   - Classe typique : org.springframework.orm.jpa.
+                     LocalContainerEntityManagerFactoryBean.
+
+3. TransactionManager (Spring TX) :
+   - Objectif : Gérer les transactions autour des opérations de l'EntityManager.
+   - Configuration : Injection de l'EntityManagerFactory.
+   - Classe typique : org.springframework.orm.jpa.JpaTransactionManager.
+
+Nécessité :
+Ces trois beans doivent être présents et correctement injectés les uns dans les
+autres pour qu'une application Spring puisse utiliser la persistance JPA avec
+des transactions.
+
+--------------------------------------------------------------------------------
+30. Qu'est-ce que la validation de contrainte dans le modèle ?
+--------------------------------------------------------------------------------
+
+La validation de contrainte dans le modèle (souvent appelée Bean Validation ou
+JSR 380/Hibernate Validator) est un moyen de déclarer des règles de validation
+sur les champs d'une classe (souvent une Entité JPA ou un DTO).
+
+Rôle :
+Assurer l'intégrité et la validité des données avant qu'elles ne soient
+persistées ou utilisées dans la logique métier.
+
+Mise en œuvre :
+Utilisation d'annotations sur les champs de la classe.
+
+Exemples :
+- @NotNull       : Le champ ne peut pas être nul.
+- @Size(min=2, max=50) : La taille de la chaîne doit être comprise entre 2 et 50.
+- @Email         : La chaîne doit avoir le format d'un email.
+- @Min(0)        : La valeur numérique doit être supérieure ou égale à zéro.
+
+Contrainte de Persistance :
+Les contraintes comme l'unicité sont souvent gérées directement au niveau de la
+base de données (via l'annotation @Column(unique=true) sur l'entité) et
+complétées par les annotations de Bean Validation.
+
+Utilisation dans Spring :
+Dans Spring MVC, l'annotation @Valid (ou @Validated) est utilisée pour
+déclencher cette validation lors de la réception d'une requête HTTP.
+
+--------------------------------------------------------------------------------
+31. Quelle est la différence entre une suppression logique (soft delete) et
+    une suppression physique ?
+--------------------------------------------------------------------------------
+
+╔════════════════╦═══════════════════════════════╦═══════════════════════════╗
+║ Caractéristique║ Suppression Physique         ║ Suppression Logique      ║
+║                ║ (Hard Delete)                ║ (Soft Delete)            ║
+╠════════════════╬═══════════════════════════════╬═══════════════════════════╣
+║ Action BDD     ║ La ligne est définitivement  ║ La ligne reste dans la   ║
+║                ║ effacée de la table          ║ table, mais un attribut  ║
+║                ║                               ║ d'état est mis à jour    ║
+╠════════════════╬═══════════════════════════════╬═══════════════════════════╣
+║ Mise en œuvre  ║ Utilisation de la commande   ║ Ajout d'une colonne de   ║
+║                ║ SQL DELETE (par ex.          ║ type booléen (isDeleted, ║
+║                ║ repository.delete(entity))   ║ actif) ou d'une date de  ║
+║                ║                               ║ suppression (deletedAt)  ║
+╠════════════════╬═══════════════════════════════╬═══════════════════════════╣
+║ Avantages      ║ Optimisation de l'espace     ║ Conservation de          ║
+║                ║ disque ; simplicité          ║ l'historique ; annulation║
+║                ║                               ║ possible ; Intégrité     ║
+║                ║                               ║ référentielle plus facile║
+╠════════════════╬═══════════════════════════════╬═══════════════════════════╣
+║ Inconvénients  ║ Perte irréversible des       ║ Complexité accrue (toutes║
+║                ║ données ; problèmes          ║ les requêtes de lecture  ║
+║                ║ d'intégrité si des           ║ doivent filtrer les      ║
+║                ║ références existent          ║ lignes supprimées) ;     ║
+║                ║                               ║ empreinte mémoire +      ║
+╚════════════════╩═══════════════════════════════╩═══════════════════════════╝
+
+Exemple :
+Dans une application de facturation, on utilise presque toujours une suppression
+logique pour éviter de perdre les données d'une facture même si le client est
+"supprimé".
+
+
+================================================================================
+                 PARTIE 3 : SPRING MVC — Contrôleurs & Couche Web
+================================================================================
+
+--------------------------------------------------------------------------------
+32. Que signifie MVC (Model-View-Controller) et quel est son objectif dans
+    Spring ?
+--------------------------------------------------------------------------------
+
+MVC (Model-View-Controller) est un motif de conception architectural qui vise à
+séparer les préoccupations d'une application en trois couches interconnectées.
+
+Objectif dans Spring :
+Fournir une structure propre et modulaire pour le développement d'applications
+web (et d'APIs RESTful) en Java.
+
+╔════════════╦═══════════════════════════════════╦═══════════════════════════╗
+║ Composant  ║ Rôle                              ║ Dans Spring MVC          ║
+╠════════════╬═══════════════════════════════════╬═══════════════════════════╣
+║ Model      ║ Représente les données de         ║ Les objets métier        ║
+║            ║ l'application (l'état) et la      ║ (entités JPA, DTOs) et la║
+║            ║ logique métier                    ║ structure de données     ║
+║            ║                                    ║ utilisée pour la Vue     ║
+╠════════════╬═══════════════════════════════════╬═══════════════════════════╣
+║ View       ║ Responsable de la présentation    ║ Les technologies de      ║
+║            ║ des données à l'utilisateur       ║ templating comme JSP,    ║
+║            ║                                    ║ Thymeleaf ou, pour API   ║
+║            ║                                    ║ REST, conversion JSON/XML║
+╠════════════╬═══════════════════════════════════╬═══════════════════════════╣
+║ Controller ║ Agit comme un intermédiaire ;     ║ Les classes annotées avec║
+║            ║ reçoit les requêtes, appelle la   ║ @Controller ou           ║
+║            ║ logique métier (Model), et        ║ @RestController          ║
+║            ║ sélectionne la vue appropriée     ║                          ║
+╚════════════╩═══════════════════════════════════╩═══════════════════════════╝
+
+--------------------------------------------------------------------------------
+33. Quel est le rôle du DispatcherServlet dans Spring MVC ?
+--------------------------------------------------------------------------------
+
+Le DispatcherServlet est le contrôleur frontal (Front Controller) central et
+essentiel de Spring MVC.
+
+Rôle :
+Il est le point d'entrée unique de toutes les requêtes HTTP adressées à
+l'application web. Il a pour responsabilité de :
+
+1. Recevoir la requête HTTP.
+2. Déléguer le traitement de la requête au bon Controller (en consultant le
+   HandlerMapping).
+3. Aider le Controller à traiter la requête (conversion de données, validation).
+4. Transmettre le Model résultant au bon système de ViewResolver pour rendre la
+   réponse finale (View).
+
+Flux :
+Requête HTTP → DispatcherServlet → Controller → Model → ViewResolver → Réponse
+
+--------------------------------------------------------------------------------
+34. Quelle est la différence entre un Controller et un RestController ?
+--------------------------------------------------------------------------------
+
+╔════════════════╦════════════════════════════════╦══════════════════════════╗
+║ Caractéristique║ @Controller                   ║ @RestController         ║
+╠════════════════╬════════════════════════════════╬══════════════════════════╣
+║ Héritage       ║ Annoté avec @Controller       ║ Annoté avec @Controller ║
+║                ║ (stéréotype de composant)     ║ ET @ResponseBody        ║
+╠════════════════╬════════════════════════════════╬══════════════════════════╣
+║ Nature de la   ║ Destiné aux applications web  ║ Destiné aux APIs RESTful║
+║ Réponse        ║ traditionnelles (qui retournent║ (qui retournent des     ║
+║                ║ des pages HTML/Vues)          ║ données, typiquement    ║
+║                ║                                ║ JSON ou XML)            ║
+╠════════════════╬════════════════════════════════╬══════════════════════════╣
+║ Comportement   ║ La valeur de retour est       ║ La valeur de retour est ║
+║ par défaut     ║ interprétée comme le nom d'une║ directement sérialisée  ║
+║                ║ vue (View Name)               ║ dans le corps de la     ║
+║                ║                                ║ réponse HTTP            ║
+╚════════════════╩════════════════════════════════╩══════════════════════════╝
+
+Exemple :
+- @Controller : Une méthode qui retourne "userPage" demande à Spring de charger
+  le template/JSP userPage.jsp.
+- @RestController : Une méthode qui retourne un objet User enverra l'objet User
+  sérialisé en JSON dans la réponse.
+
+--------------------------------------------------------------------------------
+35. Quelle est la fonction des annotations suivantes ?
+--------------------------------------------------------------------------------
+
+@RequestMapping
+---------------
+Rôle : Est l'annotation de mapping de base. Elle est utilisée au niveau de la
+classe pour définir le chemin de base d'un contrôleur et/ou au niveau de la
+méthode pour mapper une requête HTTP spécifique à une méthode de gestion.
+
+Exemple :
+@Controller
+@RequestMapping("/users") // Chemin de base pour toutes les méthodes
+public class UserController {
+    @RequestMapping(method = RequestMethod.GET) // Mappe GET /users
+    public String getAllUsers() { /* ... */ }
+}
+
+@GetMapping, @PostMapping, @PutMapping, @DeleteMapping
+-------------------------------------------------------
+Ce sont des annotations composées introduites à partir de Spring 4.3 qui sont
+des raccourcis spécifiques pour @RequestMapping. Elles sont plus claires et
+spécifiques à la sémantique des verbes HTTP pour le développement RESTful.
+
+- @GetMapping("/users") :
+  Équivalent à @RequestMapping(value = "/users", method = RequestMethod.GET)
+  (Lecture).
+
+- @PostMapping("/users") :
+  Équivalent à @RequestMapping(value = "/users", method = RequestMethod.POST)
+  (Création).
+
+- @PutMapping("/users/{id}") :
+  Équivalent à @RequestMapping(value = "/users/{id}", method = RequestMethod.PUT)
+  (Mise à jour complète).
+
+- @DeleteMapping("/users/{id}") :
+  Équivalent à @RequestMapping(value = "/users/{id}", method =
+  RequestMethod.DELETE) (Suppression).
+
+@Valid
+------
+Rôle : Utilisée comme argument de méthode dans un contrôleur pour déclencher la
+validation Bean Validation sur l'objet de la requête (souvent un DTO).
+
+Exemple :
+@PostMapping("/products")
+public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDto dto) {
+    // Si la validation échoue, Spring lève une MethodArgumentNotValidException
+}
+
+@RequestBody et @PathVariable
+------------------------------
+@RequestBody :
+Rôle : Indique qu'un paramètre de méthode doit être lié au corps entier de la
+requête HTTP (généralement JSON ou XML). Spring utilise un HttpMessageConverter
+pour désérialiser le corps dans l'objet Java spécifié.
+
+Exemple : Utilisé pour récupérer l'objet JSON envoyé par le client dans une
+requête POST/PUT.
+
+@PathVariable :
+Rôle : Indique qu'un paramètre de méthode doit être lié à une variable de
+chemin (path variable) définie dans l'URI de la requête.
+
+Exemple :
+@GetMapping("/users/{userId}") // userId est la variable de chemin
+public User getUser(@PathVariable("userId") Long id) {
+    // id reçoit la valeur de l'URI, par ex. 42
+}
+
+--------------------------------------------------------------------------------
+40. Comment le DispatcherServlet traite-t-il une requête HTTP du début à
+    la fin ?
+--------------------------------------------------------------------------------
+
+Le traitement d'une requête dans Spring MVC suit un flux défini :
+
+1. Réception de la Requête :
+   Le DispatcherServlet reçoit la requête HTTP.
+
+2. Mapping du Gestionnaire :
+   Le DispatcherServlet consulte le HandlerMapping (par ex.
+   RequestMappingHandlerMapping) pour trouver le Controller et la méthode
+   (le "handler") appropriés pour cette URI et cette méthode HTTP.
+
+3. Adaptation du Gestionnaire :
+   Le HandlerAdapter est invoqué pour exécuter la méthode du Controller (il
+   gère les annotations @PathVariable, @RequestBody, etc., pour préparer les
+   arguments).
+
+4. Exécution du Contrôleur :
+   La méthode du Controller s'exécute, interagit avec la couche Service/Métier
+   et retourne un ModelAndView (qui contient les données du Model et le nom de
+   la Vue). Pour un @RestController, il sérialise directement le retour et saute
+   les étapes suivantes.
+
+5. Résolution de la Vue :
+   Le DispatcherServlet transmet le nom de la vue au ViewResolver (par ex.
+   InternalResourceViewResolver). Le ViewResolver trouve la technologie de vue
+   réelle (par ex. /WEB-INF/views/user.jsp).
+
+6. Rendu de la Vue :
+   La Vue (par ex. JSP) est exécutée pour rendre la réponse HTML/finale, en
+   utilisant les données du Model.
+
+7. Réponse :
+   Le DispatcherServlet renvoie la réponse HTTP au client.
+
+--------------------------------------------------------------------------------
+41. Qu'est-ce que la classe de configuration Web (WebConfig) et à quoi
+    sert-elle ?
+--------------------------------------------------------------------------------
+
+La WebConfig est une classe de configuration Java (@Configuration) qui implémente
+l'interface WebMvcConfigurer (ou hérite de WebMvcConfigurerAdapter, désormais
+déprécié).
+
+Rôle :
+Elle permet de personnaliser la configuration du DispatcherServlet et de la
+couche Web de Spring MVC sans utiliser le fichier web.xml. Elle permet de :
+
+- Définir les ViewResolver (par ex. préfixes/suffixes des fichiers JSP).
+- Configurer les Interceptors (pour un traitement avant/après les requêtes).
+- Ajouter des Resource Handlers pour servir des ressources statiques (images,
+  CSS, JS).
+- Configurer les Message Converters (pour JSON/XML).
+
+Exemple :
+Pour configurer le ViewResolver pour les JSPs :
+
+@Configuration
+@EnableWebMvc // Active la configuration Spring MVC
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        registry.jsp("/WEB-INF/views/", ".jsp");
+    }
+    // ...
+}
+
+--------------------------------------------------------------------------------
+42. Pourquoi faut-il initialiser le DispatcherServlet manuellement avant
+    Spring Boot ?
+--------------------------------------------------------------------------------
+
+Avant Spring Boot (dans les projets basés sur un fichier WAR déployé sur un
+serveur d'applications comme Tomcat ou Jetty), le conteneur de Servlets Java
+(Servlet Container) ne connaissait pas Spring.
+
+Servlet 3.0 (web.xml) :
+L'initialisation se faisait en déclarant explicitement le DispatcherServlet
+dans le fichier web.xml du projet, et en spécifiant les context-param pour lui
+indiquer où trouver la configuration Spring.
+
+Configuration Manuelle :
+Le développeur devait manuellement lier la Servlet API (Tomcat/Jetty) au
+conteneur Spring (ApplicationContext pour les beans métiers et
+WebApplicationContext pour les beans web).
+
+Leçon :
+Il fallait configurer l'intégration entre le conteneur web (Tomcat) et le
+conteneur Spring, étape par étape. Spring Boot embarque le conteneur web et le
+configure automatiquement via des "auto-configurations".
+
+--------------------------------------------------------------------------------
+43. Qu'est-ce qu'un WebAppInitializer et pourquoi remplace-t-il web.xml ?
+--------------------------------------------------------------------------------
+
+Le WebApplicationInitializer est une interface de Spring (souvent implémentée
+par AbstractAnnotationConfigDispatcherServletInitializer) introduite avec la
+spécification Servlet 3.0.
+
+Rôle :
+Il permet de configurer le DispatcherServlet et l'ApplicationContext de Spring
+par programmation en Java (code) plutôt que par un fichier de configuration XML
+(web.xml).
+
+Pourquoi il remplace web.xml :
+- La spécification Servlet 3.0 permet aux conteneurs de Servlets de détecter les
+  classes qui implémentent ServletContextInitializer (que
+  WebApplicationInitializer utilise).
+- Cela permet de centraliser la configuration dans le code Java, offrant plus de
+  flexibilité, de sécurité de type (type-safety) et éliminant le besoin du
+  web.xml.
+
+Exemple (Implémentation type) :
+public class MyWebAppInitializer
+    extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class<?>[] { RootConfig.class }; // Configuration métier/services
+    }
+
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+        return new Class<?>[] { WebConfig.class }; // Configuration web MVC
+    }
+
+    @Override
+    protected String[] getServletMappings() {
+        return new String[] { "/" };
+    }
+}
+
+--------------------------------------------------------------------------------
+44. Quelles sont les étapes de traitement d'une requête REST dans Spring MVC ?
+--------------------------------------------------------------------------------
+
+Le traitement est une version simplifiée du flux du DispatcherServlet,
+spécifiquement pour un @RestController qui retourne des données :
+
+1. Réception :
+   DispatcherServlet reçoit la requête (par ex. POST /api/users avec un corps
+   JSON).
+
+2. Mapping :
+   Le HandlerMapping trouve le @RestController et la méthode @PostMapping
+   correspondants.
+
+3. Désérialisation :
+   Le HandlerAdapter utilise l'annotation @RequestBody et un HttpMessageConverter
+   (par ex. Jackson pour JSON) pour convertir le corps JSON de la requête en un
+   objet Java (DTO).
+
+4. Validation :
+   Si l'annotation @Valid est présente, la Bean Validation est exécutée.
+
+5. Exécution du Controller :
+   La méthode du @RestController s'exécute, appelle la logique métier. Elle
+   retourne un objet Java (par ex. l'utilisateur créé).
+
+6. Sérialisation :
+   Le DispatcherServlet utilise l'annotation implicite @ResponseBody et le même
+   HttpMessageConverter pour convertir l'objet Java retourné en une chaîne JSON
+   (ou un autre format) et la place dans le corps de la réponse.
+
+7. Envoi :
+   La réponse HTTP (incluant le code statut approprié, par ex. 201 Created) est
+   envoyée au client.
+
+--------------------------------------------------------------------------------
+45. Comment se fait la sérialisation et désérialisation des objets JSON ?
+--------------------------------------------------------------------------------
+
+La sérialisation (Objet Java → JSON) et la désérialisation (JSON → Objet Java)
+sont gérées dans Spring MVC par les HttpMessageConverter (Convertisseurs de
+Message HTTP).
+
+Mise en œuvre :
+
+Dépendance :
+Pour JSON, la librairie Jackson (ou GSON) doit être incluse dans le projet.
+
+Configuration :
+Spring MVC enregistre automatiquement un MappingJackson2HttpMessageConverter si
+Jackson est sur le classpath.
+
+Désérialisation (Requête) :
+Lorsqu'un contrôleur reçoit une requête avec @RequestBody, le convertisseur
+Jackson lit le corps JSON et construit l'objet Java correspondant.
+
+Sérialisation (Réponse) :
+Lorsqu'un @RestController retourne un objet, le convertisseur Jackson convertit
+l'objet Java en JSON pour le corps de la réponse.
+
+Exemple :
+JSON entrant : {"name": "Alice", "age": 30}
+Désérialisation : MappingJackson2HttpMessageConverter crée un objet
+User user = new User("Alice", 30).
+
+--------------------------------------------------------------------------------
+46. À quoi sert un @RestControllerAdvice ?
+--------------------------------------------------------------------------------
+
+L'annotation @RestControllerAdvice est une version spécialisée de
+@ControllerAdvice utilisée pour fournir une gestion globale des exceptions et
+d'autres fonctionnalités de conseil (advice) à tous les @RestController de
+l'application.
+
+Rôle :
+Centraliser la gestion des erreurs. Au lieu d'avoir des blocs try-catch dans
+chaque contrôleur, on peut définir une seule classe @RestControllerAdvice pour :
+
+- Mapper une exception à un code de statut HTTP : Utiliser
+  @ExceptionHandler(ResourceNotFoundException.class) avec
+  @ResponseStatus(HttpStatus.NOT_FOUND) pour qu'une exception non trouvée
+  retourne toujours un code 404.
+
+- Formater les messages d'erreur : Intercepter l'exception de validation
+  (MethodArgumentNotValidException) et formater tous les messages d'erreur en
+  une réponse JSON cohérente pour le client.
+
+Exemple :
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(MyCustomException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleCustomException(MyCustomException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+}
+
+--------------------------------------------------------------------------------
+47. Quelles sont les bonnes pratiques pour organiser les packages d'un projet
+    MVC ?
+--------------------------------------------------------------------------------
+
+Une structure de package cohérente et basée sur l'architecture (plutôt que par
+fonction) est la meilleure pratique pour les projets Spring.
+
+╔══════════════════╦═══════════════════════════════╦══════════════════════════╗
+║ Package          ║ Contenu typique               ║ Rôle Architectural      ║
+╠══════════════════╬═══════════════════════════════╬══════════════════════════╣
+║ com.app          ║ Base du projet (classe        ║ Point d'entrée de       ║
+║                  ║ principale AppConfig,         ║ l'application et        ║
+║                  ║ WebAppInitializer)            ║ configurations de base  ║
+╠══════════════════╬═══════════════════════════════╬══════════════════════════╣
+║ com.app.model    ║ Entités JPA (@Entity), DTOs,  ║ Couche de Données et    ║
+║                  ║ Enums                         ║ Structure d'Échange     ║
+╠══════════════════╬═══════════════════════════════╬══════════════════════════╣
+║ com.app.         ║ Interfaces Repository         ║ Couche d'Accès aux      ║
+║ repository       ║ (@Repository, étendant        ║ Données (DAO)           ║
+║                  ║ JpaRepository)                ║                         ║
+╠══════════════════╬═══════════════════════════════╬══════════════════════════╣
+║ com.app.service  ║ Classes de service (@Service) ║ Couche Métier /         ║
+║                  ║ contenant la logique métier   ║ Logique Applicative     ║
+║                  ║ (@Transactional)              ║                         ║
+╠══════════════════╬═══════════════════════════════╬══════════════════════════╣
+║ com.app.         ║ Contrôleurs Web/REST          ║ Couche Web /            ║
+║ controller       ║ (@Controller, @RestController)║ Gestionnaire de Requêtes║
+╠══════════════════╬═══════════════════════════════╬══════════════════════════╣
+║ com.app.config   ║ Classes de configuration Java ║ Configurations          ║
+║                  ║ (@Configuration), WebConfig   ║ spécifiques (sécurité,  ║
+║                  ║                                ║ persistance, MVC)       ║
+╠══════════════════╬═══════════════════════════════╬══════════════════════════╣
+║ com.app.util     ║ Classes utilitaires diverses  ║ Code transversal        ║
+║                  ║ (gestionnaires d'exceptions,  ║                         ║
+║                  ║ formateurs)                   ║                         ║
+╚══════════════════╩═══════════════════════════════╩══════════════════════════╝
+
+Avantage :
+Cette structure sépare clairement les responsabilités et facilite la navigation,
+la maintenance, et surtout la configuration de la détection de composants
+(@ComponentScan).
+
+
+================================================================================
+                              FIN DU DOCUMENT
+================================================================================
+

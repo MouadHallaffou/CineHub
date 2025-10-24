@@ -102,8 +102,80 @@ L'application suit une **architecture MVC multi-couches** :
 ### Outils de Développement
 - **Maven** (Gestion de dépendances)
 - **Docker** (Conteneurisation)
-- **JUnit 5** (Tests unitaires)
-- **Mockito** (Mocking)
+- **JUnit 4.13.2** (Tests unitaires)
+
+## 📦 Dépendances Maven et Leurs Rôles
+
+### 🌱 Spring Framework
+
+| Dépendance | Version | Rôle |
+|------------|---------|------|
+| **spring-context** | 6.2.10 | 🏗️ Conteneur IoC/DI - Gestion des beans et injection de dépendances |
+| **spring-webmvc** | 6.2.10 | 🌐 Framework MVC - Controllers REST et gestion HTTP |
+| **spring-tx** | 6.2.10 | 💳 Gestion déclarative des transactions (@Transactional) |
+| **spring-orm** | 6.2.10 | 🔗 Intégration ORM - Bridge entre Spring et Hibernate |
+| **spring-data-jpa** | 3.4.3 | 🗂️ Repositories automatiques - Simplifie l'accès aux données |
+
+### 🗄️ Persistence et Base de Données
+
+| Dépendance | Version | Rôle |
+|------------|---------|------|
+| **hibernate-core** | 6.6.4.Final | 🔄 ORM - Mapping objet-relationnel, gestion des entités JPA |
+| **mysql-connector-j** | 9.4.0 | 🔌 Driver JDBC MySQL - Connexion à la base de données |
+
+### 🌐 Jakarta EE (anciennement Java EE)
+
+| Dépendance | Version | Rôle |
+|------------|---------|------|
+| **jakarta.servlet-api** | 6.0.0 | 🌍 API Servlet - Gestion des requêtes HTTP (scope: provided) |
+| **jakarta.validation-api** | 3.0.2 | ✅ API de validation - Annotations de validation (@NotNull, @Size, etc.) |
+| **hibernate-validator** | 8.0.1.Final | 🛡️ Implémentation de Bean Validation - Validation automatique des DTOs |
+| **expressly** | 5.0.0 | 📝 Expression Language - Requis par Hibernate Validator |
+
+### 🔄 Mapping et Sérialisation
+
+| Dépendance | Version | Rôle |
+|------------|---------|------|
+| **mapstruct** | 1.5.5.Final | 🗺️ Mapping Entity ↔ DTO - Génération automatique de code à la compilation |
+| **mapstruct-processor** | 1.5.5.Final | ⚙️ Processeur d'annotations MapStruct (scope: provided) |
+| **jackson-databind** | 2.17.0 | 📄 Sérialisation/Désérialisation JSON - Conversion objets Java ↔ JSON |
+
+### 🛠️ Outils de Développement
+
+| Dépendance | Version | Rôle |
+|------------|---------|------|
+| **lombok** | 1.18.30 | ✨ Réduction du boilerplate - @Data, @Getter, @Setter, @Builder, etc. |
+| **junit** | 4.13.2 | 🧪 Framework de tests unitaires (scope: test) |
+
+### 🔧 Configuration Maven
+
+#### Plugins Importants
+
+**1. Maven Compiler Plugin** (3.11.0)
+```xml
+<annotationProcessorPaths>
+    <path><!-- Lombok --></path>
+    <path><!-- MapStruct --></path>
+</annotationProcessorPaths>
+```
+- 🎯 **Rôle** : Compile le code Java 17 et traite les annotations de Lombok et MapStruct
+
+**2. Maven WAR Plugin** (3.4.0)
+```xml
+<failOnMissingWebXml>false</failOnMissingWebXml>
+```
+- 📦 **Rôle** : Package l'application en fichier WAR sans nécessiter web.xml (grâce à WebAppInitializer)
+
+### 🎯 Pourquoi Ces Technologies ?
+
+| Technologie | Justification |
+|-------------|---------------|
+| **Spring Data JPA** | ⚡ Réduit 70% du code DAO grâce aux repositories automatiques |
+| **MapStruct** | 🚀 Mapping compile-time (vs reflection) = performances optimales |
+| **Lombok** | ✂️ Élimine ~40% du code boilerplate (getters/setters/constructeurs) |
+| **Hibernate 6.6.4** | 🆕 Support Jakarta EE, performances améliorées |
+| **Jackson** | 📊 Standard de facto pour JSON en Java |
+| **Bean Validation** | 🛡️ Validation déclarative et centralisée |
 
 ## 🗄️ Modèle de Données
 
@@ -153,6 +225,8 @@ L'application suit une **architecture MVC multi-couches** :
 - Git
 - Docker
 - Tomcat 10+
+- Docker
+- Tomcat 10+
 
 ### Étapes d'Installation
 
@@ -188,30 +262,89 @@ mvn tomcat7:run
 
 ## ⚙️ Configuration
 
-### Configuration Spring
+### Configuration Java (Zero XML Configuration)
 
-L'application utilise plusieurs modes de configuration :
+L'application utilise une **configuration Java complète** sans fichier `web.xml`, basée sur les annotations Spring :
 
-1. **Configuration XML** (`applicationContext.xml`)
-2. **Configuration par Annotations** (`@Component`, `@Service`, `@Repository`, `@Controller`)
-3. **Configuration Java** (`@Configuration`, `@Bean`)
+#### 1. **AppConfig.java** - Configuration Principale
+
+La classe `AppConfig` centralise toute la configuration de l'application :
+
+```java
+@Configuration                    // Marque comme classe de configuration Spring
+@EnableWebMvc                     // Active Spring MVC
+@ComponentScan(basePackages = "com.cinehub")  // Scan automatique des composants
+@EnableJpaRepositories(basePackages = "com.cinehub.repository")  // Active Spring Data JPA
+@EnableTransactionManagement      // Active la gestion des transactions
+public class AppConfig implements WebMvcConfigurer {
+    // Configuration des beans...
+}
+```
+
+**Rôles et responsabilités** :
+- ✅ **DataSource** : Configuration de la connexion MySQL
+- ✅ **EntityManagerFactory** : Configuration JPA/Hibernate
+- ✅ **TransactionManager** : Gestion des transactions
+- ✅ **MessageConverters** : Conversion JSON avec Jackson
+- ✅ **Hibernate Properties** : Dialecte, DDL auto, logs SQL
+
+#### 2. **WebAppInitializer.java** - Initialisation Servlet 3.0+
+
+Remplace le fichier `web.xml` traditionnel grâce à Servlet 3.0+ :
+
+```java
+public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+    
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+        return new Class[]{AppConfig.class};  // Configuration racine
+    }
+    
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+        return null;  // Pas de config servlet séparée
+    }
+    
+    @Override
+    protected String[] getServletMappings() {
+        return new String[]{"/"};  // Mappage du DispatcherServlet
+    }
+}
+```
+
+**Avantages** :
+- 🚀 Zero XML - Configuration 100% Java
+- 🔧 Type-safe et refactorable
+- 📦 Déploiement simplifié
+- ⚡ Chargement dynamique au démarrage du conteneur
 
 ### Configuration de la Base de Données
 
-Modifier le fichier de configuration avec vos paramètres :
+Configuration dans `AppConfig.java` :
 
-```properties
-# Database Configuration
-db.url=jdbc:mysql://localhost:3306/cinehub
-db.username=root
-db.password=*********
-db.driver=com.mysql.cj.jdbc.Driver
+```java
+@Bean
+public DataSource dataSource() {
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+    dataSource.setUrl("jdbc:mysql://localhost:3306/cinehubDB?useSSL=false&serverTimezone=UTC");
+    dataSource.setUsername("root");
+    dataSource.setPassword("");
+    return dataSource;
+}
+```
 
-# Hibernate Configuration
-hibernate.dialect=org.hibernate.dialect.MySQLDialect
-hibernate.hbm2ddl.auto=update
-hibernate.show_sql=true
-hibernate.format_sql=true
+### Properties Hibernate
+
+```java
+private Properties hibernateProperties() {
+    Properties properties = new Properties();
+    properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
+    properties.put("hibernate.show_sql", "false");
+    properties.put("hibernate.format_sql", "true");
+    properties.put("hibernate.hbm2ddl.auto", "update");
+    return properties;
+}
 ```
 
 ### Scopes des Beans
