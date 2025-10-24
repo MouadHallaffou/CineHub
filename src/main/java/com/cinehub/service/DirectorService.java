@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,13 +68,12 @@ public class DirectorService {
     }
 
     //  consulter la filmographie complète d'un réalisateur
-    public List<Long> findFilmIdsByDirectorId(Long directorId) {
+    public Map<Long, String> findFilmIdsByDirectorId(Long directorId) {
         var director = directorRepository.findById(directorId)
                 .orElseThrow(() -> new DirectorException(directorId));
         return director.getFilms()
                 .stream()
-                .map(Film::getFilmID)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(Film::getFilmID, Film::getTitle));
     }
 
     //  rechercher un réalisateur par son nom
