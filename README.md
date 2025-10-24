@@ -480,7 +480,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ## 👥 Auteurs
 
-- **Votre Nom** - *Développement initial* - [YourGithub](https://github.com/MouadHallaffou)
+- **Mouad Hallaffou** - *Développement initial* - [CineHub](https://github.com/MouadHallaffou)
 
 ## 🙏 Remerciements
 
