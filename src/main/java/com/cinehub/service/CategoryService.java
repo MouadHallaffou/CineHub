@@ -4,6 +4,7 @@ import com.cinehub.dto.CategoryDTO;
 import com.cinehub.exception.CategoryException;
 import com.cinehub.mapper.CategoryMapper;
 import com.cinehub.model.Category;
+import com.cinehub.model.Film;
 import com.cinehub.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,5 +64,14 @@ public class CategoryService {
         return categoryMapper.toDTO(updated);
     }
 
+    // consulter tous les films d'une catégorie donnée
+    public List<Long> findFilmIdsByCategoryId(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryException(categoryId));
+        return category.getFilms()
+                .stream()
+                .map(Film::getFilmID)
+                .collect(Collectors.toList());
+    }
 }
 

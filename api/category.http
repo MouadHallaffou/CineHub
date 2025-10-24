@@ -24,3 +24,6 @@ content-type: application/json
 
 ###
 DELETE http://localhost:8080/api/categories/2
+
+###
+GET http://localhost:8080/api/categories/3/films
