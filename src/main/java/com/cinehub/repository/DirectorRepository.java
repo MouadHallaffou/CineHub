@@ -1,10 +1,9 @@
 package com.cinehub.repository;
 
-import com.cinehub.model.Category;
+import com.cinehub.model.Director;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface DirectorRepository extends JpaRepository<Director, Long> {
 }
-

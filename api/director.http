@@ -1,0 +1,31 @@
+POST http://localhost:8080/api/directors
+content-type: application/json
+
+{
+  "firstName": "Director3",
+  "lastName": "Director3",
+  "birthDate": "1970-01-01",
+  "nationality": "Maroccan",
+  "biography": "Biography of the director3"
+}
+
+###
+GET http://localhost:8080/api/directors
+
+###
+GET http://localhost:8080/api/directors/2
+
+###
+PUT http://localhost:8080/api/directors/2
+content-type: application/json
+
+{
+  "firstName": "UpdatedDirector",
+  "lastName": "UpdatedDirector",
+  "birthDate": "1980-01-01",
+  "nationality": "UpdatedNationality",
+  "biography": "Updated biography of the director"
+}
+
+###
+DELETE http://localhost:8080/api/directors/6

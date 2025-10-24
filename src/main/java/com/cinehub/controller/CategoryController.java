@@ -50,4 +50,13 @@ public class CategoryController {
         CategoryDTO updated = categoryService.updateCategory(id, categoryDTO);
         return ResponseEntity.ok(updated);
     }
+
+    // consulter tous les films d'une catégorie donnée
+    @GetMapping("/{id}/films")
+    public ResponseEntity<CategoryDTO> getFilmsByCategoryId(@PathVariable("id") Long id) {
+        CategoryDTO categoryDTO = categoryService.findById(id);
+        return ResponseEntity.ok(categoryDTO);
+    }
 }
+
+
