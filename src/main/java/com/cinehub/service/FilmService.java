@@ -1,9 +1,11 @@
 package com.cinehub.service;
 
-import com.cinehub.dto.FilmDTO;
+import com.cinehub.dto.FilmRequestDTO;
+import com.cinehub.dto.FilmResponseDTO;
 import com.cinehub.exception.FilmException;
 import com.cinehub.mapper.FilmMapper;
 import com.cinehub.repository.FilmRepository;
+import com.cinehub.model.Film;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,35 +19,37 @@ public class FilmService {
     private final FilmRepository filmRepository;
     private final FilmMapper filmMapper;
 
-    // Constructor
+    // Constructor Injection
     public FilmService(FilmRepository filmRepository, FilmMapper filmMapper) {
         this.filmRepository = filmRepository;
         this.filmMapper = filmMapper;
     }
 
-    // create a film
-    public FilmDTO saveFilm(FilmDTO dto) {
-        var film = filmMapper.toEntity(dto);
-        var saved = filmRepository.save(film);
-        return filmMapper.toDTO(saved);
+    // CREATE : reçoit un FilmRequestDTO, retourne un FilmResponseDTO
+    public FilmResponseDTO saveFilm(FilmRequestDTO dto) {
+        Film film = filmMapper.toEntity(dto);
+        Film saved = filmRepository.save(film);
+        return filmMapper.toResponse(saved);
     }
 
-    // get all films
-    public List<FilmDTO> findAllFilms() {
+    // READ ALL
+    @Transactional(readOnly = true)
+    public List<FilmResponseDTO> findAllFilms() {
         return filmRepository.findAll()
                 .stream()
-                .map(filmMapper::toDTO)
+                .map(filmMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    // get a film by ID
-    public FilmDTO findFilmById(Long id) {
-        var film = filmRepository.findById(id)
+    // READ by ID
+    @Transactional(readOnly = true)
+    public FilmResponseDTO findFilmById(Long id) {
+        Film film = filmRepository.findById(id)
                 .orElseThrow(() -> new FilmException(id));
-        return filmMapper.toDTO(film);
+        return filmMapper.toResponse(film);
     }
 
-    // delete a film by ID
+    // DELETE
     public void deleteFilm(Long id) {
         if (!filmRepository.existsById(id)) {
             throw new FilmException(id);
@@ -53,39 +57,42 @@ public class FilmService {
         filmRepository.deleteById(id);
     }
 
-    // update a film by ID
-    public FilmDTO updateFilm(Long id, FilmDTO dto) {
+    // UPDATE : reçoit un FilmRequestDTO, retourne un FilmResponseDTO
+    public FilmResponseDTO updateFilm(Long id, FilmRequestDTO dto) {
         if (!filmRepository.existsById(id)) {
             throw new FilmException(id);
         }
-        var film = filmMapper.toEntity(dto);
+        Film film = filmMapper.toEntity(dto);
         film.setFilmID(id);
-        var updated = filmRepository.save(film);
-        return filmMapper.toDTO(updated);
+        Film updated = filmRepository.save(film);
+        return filmMapper.toResponse(updated);
     }
 
-    // rechercher un film par son titre
-    public FilmDTO findFilmByTitle(String title) {
-        var film = filmRepository.findByTitle(title)
+    // Rechercher par titre
+    @Transactional(readOnly = true)
+    public FilmResponseDTO findFilmByTitle(String title) {
+        Film film = filmRepository.findByTitle(title)
                 .orElseThrow(() -> new FilmException("Film with title '" + title + "' not found."));
-        return filmMapper.toDTO(film);
+        return filmMapper.toResponse(film);
     }
 
-    // filtrer les films par année de sortie
-    public List<FilmDTO> findFilmsByReleaseYear(int year) {
+    // Filtrer par année de sortie
+    @Transactional(readOnly = true)
+    public List<FilmResponseDTO> findFilmsByReleaseYear(int year) {
         return filmRepository.findAll()
                 .stream()
                 .filter(film -> film.getReleaseYear() != null && film.getReleaseYear() == year)
-                .map(filmMapper::toDTO)
+                .map(filmMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    // filtrer les films par note minimale
-    public List<FilmDTO> findFilmsByMinimumRating(double minRating) {
+    // Filtrer par note minimale
+    @Transactional(readOnly = true)
+    public List<FilmResponseDTO> findFilmsByMinimumRating(double minRating) {
         return filmRepository.findAll()
                 .stream()
                 .filter(film -> film.getRating() != null && film.getRating() >= minRating)
-                .map(filmMapper::toDTO)
+                .map(filmMapper::toResponse)
                 .collect(Collectors.toList());
     }
 }

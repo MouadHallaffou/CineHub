@@ -2,13 +2,13 @@ POST http://localhost:8080/api/films
 content-type: application/json
 
 {
-    "title": "Film Title 6",
-    "releaseYear": 2024,
-    "durationMinutes": 220,
-    "synopsis": "Synopsis of Film Title 6",
+    "title": "Film Title 5",
+    "releaseYear": 2014,
+    "durationMinutes": 210,
+    "synopsis": "Synopsis of Film Title 4",
     "rating": 8.5,
-    "directorID": 2,
-    "categoryID": 3
+    "directorID": 1,
+    "categoryID": 4
 }
 
 ###
