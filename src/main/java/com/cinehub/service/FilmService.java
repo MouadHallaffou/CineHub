@@ -17,17 +17,20 @@ public class FilmService {
     private final FilmRepository filmRepository;
     private final FilmMapper filmMapper;
 
+    // Constructor
     public FilmService(FilmRepository filmRepository, FilmMapper filmMapper) {
         this.filmRepository = filmRepository;
         this.filmMapper = filmMapper;
     }
 
+    // create a film
     public FilmDTO saveFilm(FilmDTO dto) {
         var film = filmMapper.toEntity(dto);
         var saved = filmRepository.save(film);
         return filmMapper.toDTO(saved);
     }
 
+    // get all films
     public List<FilmDTO> findAllFilms() {
         return filmRepository.findAll()
                 .stream()
@@ -35,12 +38,14 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    // get a film by ID
     public FilmDTO findFilmById(Long id) {
         var film = filmRepository.findById(id)
                 .orElseThrow(() -> new FilmException(id));
         return filmMapper.toDTO(film);
     }
 
+    // delete a film by ID
     public void deleteFilm(Long id) {
         if (!filmRepository.existsById(id)) {
             throw new FilmException(id);
@@ -48,6 +53,7 @@ public class FilmService {
         filmRepository.deleteById(id);
     }
 
+    // update a film by ID
     public FilmDTO updateFilm(Long id, FilmDTO dto) {
         if (!filmRepository.existsById(id)) {
             throw new FilmException(id);
@@ -56,5 +62,30 @@ public class FilmService {
         film.setFilmID(id);
         var updated = filmRepository.save(film);
         return filmMapper.toDTO(updated);
+    }
+
+    // rechercher un film par son titre
+    public FilmDTO findFilmByTitle(String title) {
+        var film = filmRepository.findByTitle(title)
+                .orElseThrow(() -> new FilmException("Film with title '" + title + "' not found."));
+        return filmMapper.toDTO(film);
+    }
+
+    // filtrer les films par année de sortie
+    public List<FilmDTO> findFilmsByReleaseYear(int year) {
+        return filmRepository.findAll()
+                .stream()
+                .filter(film -> film.getReleaseYear() != null && film.getReleaseYear() == year)
+                .map(filmMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    // filtrer les films par note minimale
+    public List<FilmDTO> findFilmsByMinimumRating(double minRating) {
+        return filmRepository.findAll()
+                .stream()
+                .filter(film -> film.getRating() != null && film.getRating() >= minRating)
+                .map(filmMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

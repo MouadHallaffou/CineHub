@@ -30,3 +30,12 @@ content-type: application/json
     "directorID": 2,
     "categoryID": 4
 }
+
+###
+GET http://localhost:8080/api/films/searchByTitle/Film%20Title%206
+
+###
+GET http://localhost:8080/api/films/filterByReleaseYear/2024
+
+###
+GET http://localhost:8080/api/films/filterByMinRating/9.0
