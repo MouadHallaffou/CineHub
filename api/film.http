@@ -1,0 +1,32 @@
+POST http://localhost:8080/api/films
+content-type: application/json
+
+{
+    "title": "Film Title 6",
+    "releaseYear": 2024,
+    "durationMinutes": 220,
+    "synopsis": "Synopsis of Film Title 6",
+    "rating": 8.5,
+    "directorID": 2,
+    "categoryID": 3
+}
+
+###
+GET http://localhost:8080/api/films
+
+###
+GET http://localhost:8080/api/films/1
+
+###
+PUT http://localhost:8080/api/films/1
+content-type: application/json
+
+{
+    "title": "Updated Film Title",
+    "releaseYear": 2023,
+    "durationMinutes": 130,
+    "synopsis": "Updated synopsis of the film",
+    "rating": 9.0,
+    "directorID": 2,
+    "categoryID": 4
+}
