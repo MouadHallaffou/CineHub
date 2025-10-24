@@ -24,7 +24,6 @@ public class Director {
     private String lastName;
 
     @Column(name = "birth_date")
-//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LocalDate birthDate;
 
     @Column(name = "nationality", length = 100)

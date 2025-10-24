@@ -3,6 +3,7 @@ package com.cinehub.service;
 import com.cinehub.dto.DirectorDTO;
 import com.cinehub.exception.DirectorException;
 import com.cinehub.mapper.DirectorMapper;
+import com.cinehub.model.Film;
 import com.cinehub.repository.DirectorRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +64,23 @@ public class DirectorService {
 
         var updated = directorRepository.save(existingDirector);
         return directorMapper.toDTO(updated);
+    }
+
+    //  consulter la filmographie complète d'un réalisateur
+    public List<Long> findFilmIdsByDirectorId(Long directorId) {
+        var director = directorRepository.findById(directorId)
+                .orElseThrow(() -> new DirectorException(directorId));
+        return director.getFilms()
+                .stream()
+                .map(Film::getFilmID)
+                .collect(Collectors.toList());
+    }
+
+    //  rechercher un réalisateur par son nom
+    public DirectorDTO findDirectorByName(String name) {
+        var director = directorRepository.findDirectorByLastNameIgnoreCase(name)
+                .orElseThrow(() -> new DirectorException("Director with name " + name + " not found"));
+        return directorMapper.toDTO(director);
     }
 
 }

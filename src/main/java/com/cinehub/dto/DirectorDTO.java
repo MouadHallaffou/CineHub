@@ -2,7 +2,6 @@ package com.cinehub.dto;
 
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -13,5 +12,5 @@ public class DirectorDTO {
     private String birthDate;
     private String nationality;
     private String biography;
-    private List<FilmDTO> films;
+    private List<FilmResponseDTO> films;
 }

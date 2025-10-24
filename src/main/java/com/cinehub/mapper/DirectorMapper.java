@@ -1,7 +1,7 @@
 package com.cinehub.mapper;
 
 import com.cinehub.dto.DirectorDTO;
-import com.cinehub.dto.FilmDTO;
+import com.cinehub.dto.FilmResponseDTO;
 import com.cinehub.model.Director;
 import com.cinehub.model.Film;
 import com.cinehub.util.DateConverter;
@@ -21,6 +21,6 @@ public interface DirectorMapper {
     @Mapping(target = "directorLastName", source = "director.lastName")
     @Mapping(target = "birthDate", source = "director.birthDate")
     @Mapping(target = "categoryName", source = "category.name")
-    FilmDTO filmToDTO(Film film);
+    FilmResponseDTO filmToDTO(Film film);
 
 }
