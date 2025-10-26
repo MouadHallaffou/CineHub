@@ -1,7 +1,7 @@
 package com.cinehub.service;
 
 import com.cinehub.dto.CategoryDTO;
-import com.cinehub.exception.CategoryException;
+import com.cinehub.exception.ResourceNotFoundException;
 import com.cinehub.mapper.CategoryMapper;
 import com.cinehub.model.Category;
 import com.cinehub.model.Film;
@@ -19,17 +19,23 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
+    // Constructor Injection
     public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
     }
 
-    public CategoryDTO saveCategory(CategoryDTO dto) {
-        Category category = categoryMapper.toEntity(dto);
-        Category saved = categoryRepository.save(category);
-        return categoryMapper.toDTO(saved);
+// ajouter une nouvelle catégorie
+public CategoryDTO saveCategory(CategoryDTO dto) {
+    if (categoryRepository.existsByName(dto.getName())) {
+        throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
     }
+    Category category = categoryMapper.toEntity(dto);
+    Category saved = categoryRepository.save(category);
+    return categoryMapper.toDTO(saved);
+}
 
+    // récupérer toutes les catégories
     public List<CategoryDTO> findAllCategories() {
         return categoryRepository.findAll()
                 .stream()
@@ -37,26 +43,31 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
+    // récupérer une catégorie par ID
     public CategoryDTO findById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryException(id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", id));
         return categoryMapper.toDTO(category);
     }
 
+    // supprimer une catégorie
     public void deleteById(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new CategoryException(id);
+            throw new ResourceNotFoundException("Category", id);
         }
         if (!findById(id).getFilms().isEmpty()) {
-            throw new RuntimeException("Cannot delete category with associated films.");
+            throw new ResourceNotFoundException("Category with associated films cannot be deleted", id);
         }
         categoryRepository.deleteById(id);
     }
 
+    // mettre à jour une catégorie
     public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
         Category existingCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryException(id));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Category", id));
+        if(categoryRepository.existsByName(dto.getName())) {
+            throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
+        }
         existingCategory.setName(dto.getName());
         existingCategory.setDescription(dto.getDescription());
 
@@ -65,13 +76,13 @@ public class CategoryService {
     }
 
     // consulter tous les films d'une catégorie donnée
-    public List<Long> findFilmIdsByCategoryId(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CategoryException(categoryId));
-        return category.getFilms()
-                .stream()
-                .map(Film::getFilmID)
-                .collect(Collectors.toList());
-    }
+   public List<Long> findFilmsByCategoryId(Long id) {
+       Category category = categoryRepository.findById(id)
+               .orElseThrow(() -> new ResourceNotFoundException("Category", id));
+       return category.getFilms()
+               .stream()
+               .map(Film::getFilmID)
+               .collect(Collectors.toList());
+   }
 }
 

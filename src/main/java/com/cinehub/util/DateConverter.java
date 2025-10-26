@@ -1,6 +1,6 @@
 package com.cinehub.util;
 
-import com.cinehub.exception.LocalDateException;
+import com.cinehub.exception.InvalidDateException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -22,7 +22,7 @@ public class DateConverter {
         try {
             return LocalDate.parse(date, FORMATTER);
         } catch (Exception e) {
-            throw new LocalDateException("Invalid date format. Expected: yyyy-MM-dd");
+            throw new InvalidDateException("Invalid date format. Expected: yyyy-MM-dd");
         }
     }
 }

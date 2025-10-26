@@ -15,7 +15,6 @@ public interface CategoryMapper {
 
     Category toEntity(CategoryDTO dto);
 
-
     @Mapping(target = "directorFirstName", source = "director.firstName")
     @Mapping(target = "directorLastName", source = "director.lastName")
     @Mapping(target = "birthDate", source = "director.birthDate")
