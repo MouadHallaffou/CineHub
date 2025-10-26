@@ -75,7 +75,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Jakarta Validation API -->
+        <!-- Jakarta ValidationEntity API -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
