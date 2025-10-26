@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/directors")
@@ -53,7 +54,7 @@ public class DirectorController {
     }
 
     // rechercher un réalisateur par son nom
-    @GetMapping("/searchByLastName/{lastName}")
+    @GetMapping("/searchByLastName?lastName={lastName}")
     public ResponseEntity<DirectorDTO> getDirectorByLastName(@PathVariable("lastName") String lastName) {
         DirectorDTO directorDTO = directorService.findDirectorByName(lastName);
         return ResponseEntity.ok(directorDTO);
@@ -61,8 +62,8 @@ public class DirectorController {
 
     // display all films of a director
     @GetMapping("/{id}/films")
-    public ResponseEntity<java.util.Map<Long, String>> getDirectorWithFilms(@PathVariable("id") Long id) {
-        java.util.Map<Long, String> films = directorService.findFilmIdsByDirectorId(id);
+    public ResponseEntity<Map<Long, String>> getDirectorWithFilms(@PathVariable("id") Long id) {
+        Map<Long, String> films = directorService.findFilmsByDirectorId(id);
         return ResponseEntity.ok(films);
     }
 
