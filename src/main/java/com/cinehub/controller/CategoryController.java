@@ -55,7 +55,7 @@ public class CategoryController {
     // consulter tous les films d'une catégorie donnée
     @GetMapping("/{id}/films")
     public ResponseEntity<List<Long>> getFilmsByCategoryId(@PathVariable("id") Long id) {
-        List<Long> filmIds = categoryService.findFilmIdsByCategoryId(id);
+        List<Long> filmIds = categoryService.findFilmsByCategoryId(id);
         return ResponseEntity.ok(filmIds);
     }
 

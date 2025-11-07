@@ -106,21 +106,21 @@ Ce sont les deux types de conteneurs IoC fournis par Spring, ApplicationContext
 étant une amélioration de BeanFactory.
 
 ╔════════════════╦════════════════════════════╦══════════════════════════════╗
-║ Caractéristique║ BeanFactory (Base)        ║ ApplicationContext (Avancé) ║
+║ Caractéristique║ BeanFactory (Base)         ║ ApplicationContext (Avancé)  ║
 ╠════════════════╬════════════════════════════╬══════════════════════════════╣
-║ Chargement     ║ Lazy Loading : Les beans  ║ Eager Loading : Les beans    ║
-║                ║ sont chargés uniquement   ║ Singleton sont chargés au    ║
-║                ║ lorsqu'ils sont demandés  ║ démarrage du contexte        ║
+║ Chargement     ║ Lazy Loading : Les beans   ║ Eager Loading : Les beans    ║
+║                ║ sont chargés uniquement    ║ Singleton sont chargés au    ║
+║                ║ lorsqu'ils sont demandés   ║ démarrage du contexte        ║
 ╠════════════════╬════════════════════════════╬══════════════════════════════╣
-║ Fonctionnalités║ Minimales : Support       ║ Avancées : Hérite de         ║
-║                ║ IoC/DI de base uniquement ║ BeanFactory et ajoute :      ║
+║ Fonctionnalités║ Minimales : Support        ║ Avancées : Hérite de         ║
+║                ║ IoC/DI de base uniquement  ║ BeanFactory et ajoute :      ║
 ║                ║                            ║ - i18n                       ║
 ║                ║                            ║ - Événements d'application   ║
 ║                ║                            ║ - Intégration AOP            ║
 ║                ║                            ║ - Détection automatique      ║
 ╠════════════════╬════════════════════════════╬══════════════════════════════╣
-║ Utilisation    ║ Environnements avec       ║ Recommandé pour la majorité  ║
-║                ║ contraintes mémoire       ║ des applications entreprise  ║
+║ Utilisation    ║ Environnements avec        ║ Recommandé pour la majorité  ║
+║                ║ contraintes mémoire        ║ des applications entreprise  ║
 ╚════════════════╩════════════════════════════╩══════════════════════════════╝
 
 Exemple :
@@ -820,7 +820,7 @@ Requête HTTP → DispatcherServlet → Controller → Model → ViewResolver �
 --------------------------------------------------------------------------------
 
 ╔════════════════╦════════════════════════════════╦══════════════════════════╗
-║ Caractéristique║ @Controller                   ║ @RestController         ║
+║ Caractéristique║ @Controller                    ║ @RestController         ║
 ╠════════════════╬════════════════════════════════╬══════════════════════════╣
 ║ Héritage       ║ Annoté avec @Controller       ║ Annoté avec @Controller ║
 ║                ║ (stéréotype de composant)     ║ ET @ResponseBody        ║

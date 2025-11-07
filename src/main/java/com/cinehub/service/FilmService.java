@@ -2,7 +2,8 @@ package com.cinehub.service;
 
 import com.cinehub.dto.FilmRequestDTO;
 import com.cinehub.dto.FilmResponseDTO;
-import com.cinehub.exception.FilmException;
+import com.cinehub.exception.BusinessException;
+import com.cinehub.exception.ResourceNotFoundException;
 import com.cinehub.mapper.FilmMapper;
 import com.cinehub.repository.FilmRepository;
 import com.cinehub.model.Film;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class FilmService {
+public class FilmService implements IFilmService {
 
     private final FilmRepository filmRepository;
     private final FilmMapper filmMapper;
@@ -26,7 +27,11 @@ public class FilmService {
     }
 
     // CREATE : reçoit un FilmRequestDTO, retourne un FilmResponseDTO
+    @Override
     public FilmResponseDTO saveFilm(FilmRequestDTO dto) {
+        if (filmRepository.existsByTitle(dto.getTitle())) {
+            throw new BusinessException("A film with the same title already exists.");
+        }
         Film film = filmMapper.toEntity(dto);
         Film saved = filmRepository.save(film);
         return filmMapper.toResponse(saved);
@@ -34,6 +39,7 @@ public class FilmService {
 
     // READ ALL
     @Transactional(readOnly = true)
+    @Override
     public List<FilmResponseDTO> findAllFilms() {
         return filmRepository.findAll()
                 .stream()
@@ -43,24 +49,33 @@ public class FilmService {
 
     // READ by ID
     @Transactional(readOnly = true)
+    @Override
     public FilmResponseDTO findFilmById(Long id) {
         Film film = filmRepository.findById(id)
-                .orElseThrow(() -> new FilmException(id));
+                .orElseThrow(() -> new ResourceNotFoundException("Film", id));
         return filmMapper.toResponse(film);
     }
 
     // DELETE
+    @Override
     public void deleteFilm(Long id) {
         if (!filmRepository.existsById(id)) {
-            throw new FilmException(id);
+            throw new ResourceNotFoundException("Film", id);
         }
         filmRepository.deleteById(id);
     }
 
     // UPDATE : reçoit un FilmRequestDTO, retourne un FilmResponseDTO
+    @Override
     public FilmResponseDTO updateFilm(Long id, FilmRequestDTO dto) {
         if (!filmRepository.existsById(id)) {
-            throw new FilmException(id);
+            throw new ResourceNotFoundException("Film", id);
+        }
+        if (filmRepository.existsByTitle(dto.getTitle())) {
+            Film existingFilm = filmRepository.findByTitle(dto.getTitle()).get();
+            if (!existingFilm.getFilmID().equals(id)) {
+                throw new BusinessException("A film with the same title already exists.");
+            }
         }
         Film film = filmMapper.toEntity(dto);
         film.setFilmID(id);
@@ -70,14 +85,16 @@ public class FilmService {
 
     // Rechercher par titre
     @Transactional(readOnly = true)
+    @Override
     public FilmResponseDTO findFilmByTitle(String title) {
         Film film = filmRepository.findByTitle(title)
-                .orElseThrow(() -> new FilmException("Film with title '" + title + "' not found."));
+                .orElseThrow(() -> new BusinessException("Film with title '" + title + "' not found."));
         return filmMapper.toResponse(film);
     }
 
     // Filtrer par année de sortie
     @Transactional(readOnly = true)
+    @Override
     public List<FilmResponseDTO> findFilmsByReleaseYear(int year) {
         return filmRepository.findAll()
                 .stream()
@@ -88,6 +105,7 @@ public class FilmService {
 
     // Filtrer par note minimale
     @Transactional(readOnly = true)
+    @Override
     public List<FilmResponseDTO> findFilmsByMinimumRating(double minRating) {
         return filmRepository.findAll()
                 .stream()
@@ -95,4 +113,15 @@ public class FilmService {
                 .map(filmMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    // Consulter tous les films d'une catégorie donnée
+    @Transactional(readOnly = true)
+    @Override
+    public List<FilmResponseDTO> getFilmsByCategorie(String category) {
+        return filmRepository.findFilmByCategory_Name(category)
+                .stream()
+                .map(filmMapper::toResponse)
+                .toList();
+    }
+
 }

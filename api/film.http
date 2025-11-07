@@ -2,7 +2,7 @@ POST http://localhost:8080/api/films
 content-type: application/json
 
 {
-    "title": "Film Title 5",
+    "title": "Film Title 10",
     "releaseYear": 2014,
     "durationMinutes": 210,
     "synopsis": "Synopsis of Film Title 4",
@@ -18,7 +18,7 @@ GET http://localhost:8080/api/films
 GET http://localhost:8080/api/films/1
 
 ###
-PUT http://localhost:8080/api/films/1
+PUT http://localhost:8080/api/films/6
 content-type: application/json
 
 {
