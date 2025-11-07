@@ -179,6 +179,7 @@
                     <source>17</source>
                     <target>17</target>
                     <annotationProcessorPaths>
+
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
@@ -190,6 +191,7 @@
                             <artifactId>mapstruct-processor</artifactId>
                             <version>1.5.5.Final</version>
                         </path>
+
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>

@@ -1,7 +1,9 @@
 package com.cinehub.controller;
 
+import com.cinehub.dto.CategoryDTO;
 import com.cinehub.dto.FilmRequestDTO;
 import com.cinehub.dto.FilmResponseDTO;
+import com.cinehub.model.Category;
 import com.cinehub.service.FilmService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +66,13 @@ public class FilmController {
     @GetMapping("/filterByMinRating/{minRating}")
     public ResponseEntity<List<FilmResponseDTO>> getFilmsByMinRating(@PathVariable("minRating") Double minRating) {
         List<FilmResponseDTO> films = filmService.findFilmsByMinimumRating(minRating);
+        return ResponseEntity.ok(films);
+    }
+
+
+    @GetMapping("/find/{category}")
+    public ResponseEntity<List<FilmResponseDTO>> getFilmparCategory(@PathVariable("category") String category){
+        List<FilmResponseDTO> films = filmService.getFilmsByCategorie(category);
         return ResponseEntity.ok(films);
     }
 

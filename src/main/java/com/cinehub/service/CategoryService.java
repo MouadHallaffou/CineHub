@@ -14,28 +14,29 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class CategoryService {
-
+public class CategoryService implements ICategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
-    // Constructor Injection
     public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
     }
 
-// ajouter une nouvelle catégorie
-public CategoryDTO saveCategory(CategoryDTO dto) {
-    if (categoryRepository.existsByName(dto.getName())) {
-        throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
+    // ajouter une nouvelle catégorie
+    @Override
+    public CategoryDTO saveCategory(CategoryDTO dto) {
+        if (categoryRepository.existsByName(dto.getName())) {
+            throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
+        }
+        Category category = categoryMapper.toEntity(dto);
+        Category saved = categoryRepository.save(category);
+        return categoryMapper.toDTO(saved);
     }
-    Category category = categoryMapper.toEntity(dto);
-    Category saved = categoryRepository.save(category);
-    return categoryMapper.toDTO(saved);
-}
 
     // récupérer toutes les catégories
+    @Override
+    @Transactional(readOnly = true)
     public List<CategoryDTO> findAllCategories() {
         return categoryRepository.findAll()
                 .stream()
@@ -44,6 +45,8 @@ public CategoryDTO saveCategory(CategoryDTO dto) {
     }
 
     // récupérer une catégorie par ID
+    @Override
+    @Transactional(readOnly = true)
     public CategoryDTO findById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", id));
@@ -51,6 +54,7 @@ public CategoryDTO saveCategory(CategoryDTO dto) {
     }
 
     // supprimer une catégorie
+    @Override
     public void deleteById(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new ResourceNotFoundException("Category", id);
@@ -62,10 +66,11 @@ public CategoryDTO saveCategory(CategoryDTO dto) {
     }
 
     // mettre à jour une catégorie
+    @Override
     public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", id));
-        if(categoryRepository.existsByName(dto.getName())) {
+        if (categoryRepository.existsByName(dto.getName())) {
             throw new IllegalArgumentException("Une catégorie avec ce nom existe déjà");
         }
         existingCategory.setName(dto.getName());
@@ -76,13 +81,16 @@ public CategoryDTO saveCategory(CategoryDTO dto) {
     }
 
     // consulter tous les films d'une catégorie donnée
-   public List<Long> findFilmsByCategoryId(Long id) {
-       Category category = categoryRepository.findById(id)
-               .orElseThrow(() -> new ResourceNotFoundException("Category", id));
-       return category.getFilms()
-               .stream()
-               .map(Film::getFilmID)
-               .collect(Collectors.toList());
-   }
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> findFilmsByCategoryId(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", id));
+        return category.getFilms()
+                .stream()
+                .map(Film::getFilmID)
+                .collect(Collectors.toList());
+    }
+
 }
 

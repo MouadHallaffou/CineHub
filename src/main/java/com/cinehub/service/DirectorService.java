@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class DirectorService {
+public class DirectorService implements IDirectorService {
     private final DirectorRepository directorRepository;
     private final DirectorMapper directorMapper;
 
@@ -24,8 +24,9 @@ public class DirectorService {
         this.directorMapper = directorMapper;
     }
 
+    @Override
     public DirectorDTO saveDirector(DirectorDTO dto) {
-        if(directorRepository.existsByLastNameIgnoreCase(dto.getLastName())) {
+        if (directorRepository.existsByLastNameIgnoreCase(dto.getLastName())) {
             throw new IllegalArgumentException("A director with the same last name already exists.");
         }
         var director = directorMapper.toEntity(dto);
@@ -33,6 +34,8 @@ public class DirectorService {
         return directorMapper.toDTO(saved);
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public List<DirectorDTO> findAllDirectors() {
         return directorRepository.findAll()
                 .stream()
@@ -40,26 +43,30 @@ public class DirectorService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public void deleteDirector(Long id) {
-        if(!directorRepository.existsById(id)) {
+        if (!directorRepository.existsById(id)) {
             throw new ResourceNotFoundException("Director", id);
         }
-        if(!findDirectorById(id).getFilms().isEmpty()) {
+        if (!findDirectorById(id).getFilms().isEmpty()) {
             throw new RuntimeException("Cannot delete director with associated films.");
         }
         directorRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public DirectorDTO findDirectorById(Long id) {
         var director = directorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Director", id));
         return directorMapper.toDTO(director);
     }
 
+    @Override
     public DirectorDTO updateDirector(Long id, DirectorDTO dto) {
         var existingDirector = directorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Director", id));
-        if(directorRepository.existsByLastNameIgnoreCase(dto.getLastName())
+        if (directorRepository.existsByLastNameIgnoreCase(dto.getLastName())
                 && !existingDirector.getLastName().equalsIgnoreCase(dto.getLastName())) {
             throw new IllegalArgumentException("A director with the same last name already exists.");
         }
@@ -74,6 +81,8 @@ public class DirectorService {
     }
 
     //  consulter la filmographie complète d'un réalisateur
+    @Override
+    @Transactional(readOnly = true)
     public Map<Long, String> findFilmsByDirectorId(Long directorId) {
         var director = directorRepository.findById(directorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Director", directorId));
@@ -83,6 +92,8 @@ public class DirectorService {
     }
 
     //  rechercher un réalisateur par son nom
+    @Override
+    @Transactional(readOnly = true)
     public DirectorDTO findDirectorByName(String name) {
         var director = directorRepository.findDirectorByLastNameIgnoreCase(name)
                 .orElseThrow(() -> new ResourceNotFoundException("Director with name " + name + " not found"));

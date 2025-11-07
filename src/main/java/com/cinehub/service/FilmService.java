@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class FilmService {
+public class FilmService implements IFilmService {
 
     private final FilmRepository filmRepository;
     private final FilmMapper filmMapper;
@@ -27,6 +27,7 @@ public class FilmService {
     }
 
     // CREATE : reçoit un FilmRequestDTO, retourne un FilmResponseDTO
+    @Override
     public FilmResponseDTO saveFilm(FilmRequestDTO dto) {
         if (filmRepository.existsByTitle(dto.getTitle())) {
             throw new BusinessException("A film with the same title already exists.");
@@ -38,6 +39,7 @@ public class FilmService {
 
     // READ ALL
     @Transactional(readOnly = true)
+    @Override
     public List<FilmResponseDTO> findAllFilms() {
         return filmRepository.findAll()
                 .stream()
@@ -47,6 +49,7 @@ public class FilmService {
 
     // READ by ID
     @Transactional(readOnly = true)
+    @Override
     public FilmResponseDTO findFilmById(Long id) {
         Film film = filmRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Film", id));
@@ -54,6 +57,7 @@ public class FilmService {
     }
 
     // DELETE
+    @Override
     public void deleteFilm(Long id) {
         if (!filmRepository.existsById(id)) {
             throw new ResourceNotFoundException("Film", id);
@@ -62,6 +66,7 @@ public class FilmService {
     }
 
     // UPDATE : reçoit un FilmRequestDTO, retourne un FilmResponseDTO
+    @Override
     public FilmResponseDTO updateFilm(Long id, FilmRequestDTO dto) {
         if (!filmRepository.existsById(id)) {
             throw new ResourceNotFoundException("Film", id);
@@ -80,6 +85,7 @@ public class FilmService {
 
     // Rechercher par titre
     @Transactional(readOnly = true)
+    @Override
     public FilmResponseDTO findFilmByTitle(String title) {
         Film film = filmRepository.findByTitle(title)
                 .orElseThrow(() -> new BusinessException("Film with title '" + title + "' not found."));
@@ -88,6 +94,7 @@ public class FilmService {
 
     // Filtrer par année de sortie
     @Transactional(readOnly = true)
+    @Override
     public List<FilmResponseDTO> findFilmsByReleaseYear(int year) {
         return filmRepository.findAll()
                 .stream()
@@ -98,6 +105,7 @@ public class FilmService {
 
     // Filtrer par note minimale
     @Transactional(readOnly = true)
+    @Override
     public List<FilmResponseDTO> findFilmsByMinimumRating(double minRating) {
         return filmRepository.findAll()
                 .stream()
@@ -105,4 +113,15 @@ public class FilmService {
                 .map(filmMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    // Consulter tous les films d'une catégorie donnée
+    @Transactional(readOnly = true)
+    @Override
+    public List<FilmResponseDTO> getFilmsByCategorie(String category) {
+        return filmRepository.findFilmByCategory_Name(category)
+                .stream()
+                .map(filmMapper::toResponse)
+                .toList();
+    }
+
 }
